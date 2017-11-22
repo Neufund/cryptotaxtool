@@ -1,0 +1,8 @@
+{
+  "name": "eth_accounting",
+  "version": "0.0.1",
+  "description": "Scripts to get transactions information for accounting",
+  "main": "index.js",
+  "repository": "git@github.com:Neufund/eth_accounting.git",
+  "author": "Tomek Banach <tomek@banciur.org>"
+}
