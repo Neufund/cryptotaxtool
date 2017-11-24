@@ -3,7 +3,7 @@ import * as json2csv from "json2csv";
 
 import * as c from "../config.json";
 import { ethPrices } from "./ethPrices";
-import { getTransactions } from "./transactions";
+import { getTransactions , parseTransactions } from "./transactions";
 import { IConfig } from "./typings/config";
 
 // TODO: this should be done properly
@@ -12,16 +12,16 @@ const config = c as IConfig;
 const code = async () =>  {
     const prices = await ethPrices();
     const txs = await getTransactions(config.wallets);
-
     txs.sort(sortTable);
+    const txParsed = parseTransactions(txs);
     // console.log(prices);
     // console.log(txs);
 
-    //writeToFile(txs);
+    // writeToFile(txs);
 
 };
 
-code();
+code().catch((err) => console.log(err));
 
 const sortTable = (a: any, b: any) => {
     const timeStampA = parseInt(a.timeStamp, 10);

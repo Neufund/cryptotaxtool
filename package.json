@@ -19,9 +19,11 @@
     "start": "yarn build && node ./dist/index.js"
   },
   "dependencies": {
+    "bignumber.js": "^4.1.0",
     "bluebird": "^3.5.1",
     "json2csv": "^3.11.5",
     "moment": "^2.19.2",
-    "node-fetch": "^1.7.3"
+    "node-fetch": "^1.7.3",
+    "web3": "0.19.0"
   }
 }
