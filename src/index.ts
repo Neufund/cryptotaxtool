@@ -10,15 +10,11 @@ import { IConfig } from "./typings/config";
 const config = c as IConfig;
 
 const code = async () =>  {
-    const prices = await ethPrices();
     const txs = await getTransactions(config.wallets);
     txs.sort(sortTable);
     const txParsed = parseTransactions(txs);
-    // console.log(prices);
-    // console.log(txs);
-
-    // writeToFile(txs);
-
+    const txFinal = await computeFiatValueAndLocality(txParsed);
+    writeToFile(txFinal);
 };
 
 code().catch((err) => console.log(err));
@@ -29,9 +25,34 @@ const sortTable = (a: any, b: any) => {
     return timeStampA - timeStampB;
 };
 
+const computeFiatValueAndLocality = async (transactions: any) => {
+    const prices = await ethPrices();
+
+    return transactions.map((tx: any) => {
+        // console.log(tx);
+        const ethPrice = prices[tx.date];
+        const localTo = undefined !== config.wallets.find((elm) => {
+            return elm.toLowerCase() === tx.to;
+        });
+
+        const localFrom = undefined !== config.wallets.find((elm) => {
+            return elm.toLowerCase() === tx.from;
+        });
+        const local = localFrom && localTo;
+
+        return {
+            date: tx.date,
+            hash: tx.hash,
+            local,
+            txCostFiat: tx.gasEth.times(ethPrice).toString(),
+            txValueFiat: tx.value.times(ethPrice).toString(),
+        };
+    });
+};
+
 const writeToFile = (transactions: any) => {
-    // const fields = ["gasPrice", "gasUsed", "hash", "isError", "time", "to", "value"];
-    const csv = json2csv({ data: transactions, fields: Object.keys(transactions[0])});
+    const fields = ["hash", "date", "txCostFiat", "txValueFiat", "local"];
+    const csv = json2csv({ data: transactions, fields });
 
     writeFile("file.csv", csv, (err) => {
         if (err) {

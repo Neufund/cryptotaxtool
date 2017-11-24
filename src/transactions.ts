@@ -19,8 +19,8 @@ export const getTransactions = async (wallets: [string]): Promise<any[]> => {
             return res.json();
         });
         ret = ret.concat(txs.result.map((tx: any) => {
-            // console.log(tx);
             return {
+                from: tx.from,
                 gasPrice: tx.gasPrice,
                 gasUsed: tx.gasUsed,
                 hash: tx.hash,
@@ -44,23 +44,21 @@ export const parseTransactions = (transactions: any) => {
     const web3 = new Web3();
     const ret: any[] = [];
     for (const tx of transactions) {
-        // console.log(tx);
         const parsedTx = {
             date: Moment.unix(tx.timeStamp).format("YYYY-MM-DD"),
+            from: tx.from,
             gasEth: 0,
             gasPrice: new BigNumber(tx.gasPrice),
             gasUsed: tx.issuedTx ? new BigNumber(tx.gasUsed) : new BigNumber(0),
             hash: tx.hash,
             to: tx.to,
-            value: tx.txreceipt_status ? new BigNumber(0) : new BigNumber(tx.value),
+            value: tx.txFailed ? new BigNumber(0) : new BigNumber(tx.value),
         };
-        // console.log(parsedTx);
         if (tx.issuedTx) {
             parsedTx.value = parsedTx.value.neg();
         }
         parsedTx.gasEth = web3.fromWei(parsedTx.gasPrice.times(parsedTx.gasUsed), "ether");
         parsedTx.value = web3.fromWei(parsedTx.value, "ether");
-        console.log(parsedTx);
         ret.push(parsedTx);
     }
 
