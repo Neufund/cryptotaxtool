@@ -7,12 +7,20 @@
   "author": "Tomek Banach <tomek@banciur.org>",
   "license": "MIT",
   "devDependencies": {
+    "@types/bluebird": "^3.5.18",
+    "@types/moment": "^2.13.0",
     "@types/node": "^8.0.53",
+    "@types/node-fetch": "^1.6.7",
     "tslint": "^5.8.0",
     "typescript": "^2.6.1"
   },
   "scripts": {
     "build": "rm -rf ./build && tsc",
     "start": "yarn build && node ./dist/index.js"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "moment": "^2.19.2",
+    "node-fetch": "^1.7.3"
   }
 }
