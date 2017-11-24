@@ -10,13 +10,22 @@ const config = c as IConfig;
 
 const code = async () =>  {
     const txs = await getTransactions(config.wallets);
-    // console.log(txs);
 
-    writeToFile(txs);
+    txs.sort(sortTable);
+
+    console.log(txs);
+
+    //writeToFile(txs);
 
 };
 
 code();
+
+const sortTable = (a: any, b: any) => {
+    const timeStampA = parseInt(a.timeStamp, 10);
+    const timeStampB = parseInt(b.timeStamp, 10);
+    return timeStampA - timeStampB;
+};
 
 const writeToFile = (transactions: any) => {
     // const fields = ["gasPrice", "gasUsed", "hash", "isError", "time", "to", "value"];
