@@ -2,6 +2,7 @@ import { writeFile} from "fs";
 import * as json2csv from "json2csv";
 
 import * as c from "../config.json";
+import { Currency } from "./constants";
 import { ethPrices } from "./ethPrices";
 import { getTransactions , parseTransactions } from "./transactions";
 import { IConfig } from "./typings/config";
@@ -15,6 +16,7 @@ const code = async () =>  {
     const txParsed = parseTransactions(txs);
     const txFinal = await computeFiatValueAndLocality(txParsed);
     writeToFile(txFinal);
+
 };
 
 code().catch((err) => console.log(err));
@@ -26,10 +28,9 @@ const sortTable = (a: any, b: any) => {
 };
 
 const computeFiatValueAndLocality = async (transactions: any) => {
-    const prices = await ethPrices();
+    const prices = await ethPrices(transactions[0].date, Currency.USD);
 
     return transactions.map((tx: any) => {
-        // console.log(tx);
         const ethPrice = prices[tx.date];
         const localTo = undefined !== config.wallets.find((elm) => {
             return elm.toLowerCase() === tx.to;

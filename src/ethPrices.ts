@@ -1,13 +1,17 @@
 import * as Moment from "moment";
 import fetch from "node-fetch";
 
-export const ethPrices = async () => {
-    console.log("getting prices from Kraken");
-    const url = "https://api.kraken.com/0/public/OHLC?pair=XETHZEUR&since=1506816000&interval=1440";
+import { Currency } from "./constants";
+
+export const ethPrices = async (startDate: string, currency: Currency) => {
+    console.log(`getting prices from Kraken starting from: ${startDate}`);
+    const startDateParsed = Moment(startDate);
+    const currencySymbol = currency === Currency.USD ? "XETHZUSD" : "XETHZEUR";
+    const url = `https://api.kraken.com/0/public/OHLC?pair=${currencySymbol}&since=${startDateParsed.unix()}&interval=1440`;
     return fetch(url)
         .then((res) => res.json())
         .then((res) => {
-            const pricesRaw = res.result.XETHZEUR;
+            const pricesRaw = res.result[currencySymbol];
             const prices = pricesRaw.map(
                 (price: any) => {
                     return {
