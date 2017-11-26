@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import { Currency } from "./constants";
 
 export const ethPrices = async (startDate: string, currency: Currency) => {
-    console.log(`getting prices from Kraken starting from: ${startDate}`);
+    console.log(`getting prices from Kraken starting from: ${startDate} in ${currency}`);
     const startDateParsed = Moment(startDate);
     const currencySymbol = currency === Currency.USD ? "XETHZUSD" : "XETHZEUR";
     const url = `https://api.kraken.com/0/public/OHLC?pair=${currencySymbol}&since=${startDateParsed.unix()}&interval=1440`;
