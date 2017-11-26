@@ -42,7 +42,9 @@ export interface IParsedTransaction {
 export interface IComputedTransaction {
     date: string;
     hash: string;
+    txCostETH: string;
     txCostFiat: string;
+    txValueETH: string;
     txValueFiat: string;
     type: TxType;
 }

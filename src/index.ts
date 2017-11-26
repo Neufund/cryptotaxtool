@@ -31,7 +31,7 @@ const sortTable = (a: IRawTransaction, b: IRawTransaction): number => {
 };
 
 const computeTransactions = async (transactions: IParsedTransaction[]): Promise<IComputedTransaction[]> => {
-    const prices = await ethPrices(transactions[0].date.format(dateFormat), Currency.USD);
+    const prices = await ethPrices(transactions[0].date.format(dateFormat), Currency.EUR);
 
     const txs = transactions.map((tx) => {
         const txDate = tx.date.format(dateFormat);
@@ -70,7 +70,9 @@ const computeTransactions = async (transactions: IParsedTransaction[]): Promise<
         return {
             date: txDate,
             hash: tx.hash,
+            txCostETH: tx.gasEth.toString(),
             txCostFiat: txType === TxType.INCOMING ? "0" : tx.gasEth.times(ethPrice).toFixed(4),
+            txValueETH: tx.value.toString(),
             txValueFiat: tx.txFailed ? "0" : tx.value.times(ethPrice).toFixed(4),
             type: txType,
         };
@@ -81,7 +83,7 @@ const computeTransactions = async (transactions: IParsedTransaction[]): Promise<
 };
 
 const writeToFile = (transactions: any) => {
-    const fields = ["hash", "date", "txCostFiat", "txValueFiat", "type"];
+    const fields = ["hash", "txCostETH", "txValueETH", "date", "txCostFiat", "txValueFiat", "type"];
     const csv = json2csv({ data: transactions, fields });
 
     if (!existsSync("./outcome")) {
