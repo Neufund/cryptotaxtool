@@ -1,5 +1,8 @@
 export interface IConfig {
     startBlock: string;
     ethScanApiKey: string;
-    wallets: [string];
+    wallets: Array<{
+        address: string;
+        alias: string;
+    }>;
 }

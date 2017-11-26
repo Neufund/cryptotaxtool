@@ -13,7 +13,8 @@ const config = c as IConfig;
 let createdContracts: string[];
 
 const code = async () =>  {
-    const txsRaw = await getTransactions(config.wallets);
+    const walletsToCheck = config.wallets.map((wallet) => wallet.address);
+    const txsRaw = await getTransactions(walletsToCheck);
     txsRaw.sort(sortTable);
     createdContracts = txsRaw.filter((txRaw) => txRaw.contractAddress !== "").map((txRaw) => txRaw.contractAddress);
     const txsParsed = parseTransactions(txsRaw);
@@ -37,19 +38,23 @@ const computeTransactions = async (transactions: IParsedTransaction[]): Promise<
         const txDate = tx.date.format(dateFormat);
         const ethPrice = prices[txDate];
 
-        let localTo = undefined !== config.wallets.find((elm) => {
-            return elm.toLowerCase() === tx.to.toLowerCase();
+        const toConfig = config.wallets.find((elm) => {
+            return elm.address.toLowerCase() === tx.to.toLowerCase();
         });
+        const toName = (toConfig !== undefined && toConfig.alias !== "") ? toConfig.alias : tx.to;
 
+        let localTo = toConfig !== undefined;
         localTo = localTo || undefined !== createdContracts.find((elm) => {
             return elm.toLowerCase() === tx.to.toLowerCase();
         });
 
         localTo = localTo || tx.contractCreation;
 
-        const localFrom = undefined !== config.wallets.find((elm) => {
-            return elm.toLowerCase() === tx.from.toLowerCase();
+        const fromConfig = config.wallets.find((elm) => {
+            return elm.address.toLowerCase() === tx.from.toLowerCase();
         });
+        const fromName = (fromConfig !== undefined && fromConfig.alias !== "") ? fromConfig.alias : tx.from;
+        const localFrom = fromConfig !== undefined;
 
         let txType: TxType = null;
         if (localFrom && localTo) {
@@ -62,14 +67,16 @@ const computeTransactions = async (transactions: IParsedTransaction[]): Promise<
             throw new Error("transaction not FROM nor TO our wallet");
         }
 
-        // we omit incomming filed transactions
+        // we omit incoming failed transactions
         if (txType === TxType.INCOMING && tx.txFailed) {
             return null;
         }
 
         return {
             date: txDate,
+            from: fromName,
             hash: tx.hash,
+            to: toName,
             txCostETH: tx.gasEth.toString(),
             txCostFiat: txType === TxType.INCOMING ? "0" : tx.gasEth.times(ethPrice).toFixed(4),
             txValueETH: tx.value.toString(),
@@ -83,7 +90,7 @@ const computeTransactions = async (transactions: IParsedTransaction[]): Promise<
 };
 
 const writeToFile = (transactions: any) => {
-    const fields = ["hash", "txCostETH", "txValueETH", "date", "txCostFiat", "txValueFiat", "type"];
+    const fields = ["hash", "from", "to", "txCostETH", "txValueETH", "date", "txCostFiat", "txValueFiat", "type"];
     const csv = json2csv({ data: transactions, fields });
 
     if (!existsSync("./outcome")) {

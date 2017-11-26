@@ -12,7 +12,7 @@ import {IConfig} from "./typings/config";
 // TODO: this should be done properly
 const config = c as IConfig;
 
-export const getTransactions = async (wallets: [string]): Promise<IRawTransaction[]> => {
+export const getTransactions = async (wallets: string[]): Promise<IRawTransaction[]> => {
     let allTxs: IRawTransaction[] = [];
     for (const wallet of wallets) {
         const addresss = getEtherScanApiTxURL(wallet);
