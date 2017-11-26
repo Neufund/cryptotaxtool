@@ -22,6 +22,7 @@ export const getTransactions = async (wallets: [string]): Promise<IRawTransactio
         });
         allTxs = allTxs.concat(txs.result.map((tx: any): IRawTransaction => {
             return {
+                contractAddress: tx.contractAddress,
                 from: tx.from,
                 gasPrice: tx.gasPrice,
                 gasUsed: tx.gasUsed,
@@ -47,6 +48,7 @@ export const parseTransactions = (transactions: IRawTransaction[]): IParsedTrans
     const ret: IParsedTransaction[] = [];
     for (const tx of transactions) {
         const parsedTx = {
+            contractCreation: tx.contractAddress !== "",
             date: Moment.unix(parseInt(tx.timeStamp, 10)),
             from: tx.from,
             gasEth: new BigNumber(0),

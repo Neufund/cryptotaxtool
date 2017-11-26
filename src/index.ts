@@ -10,9 +10,12 @@ import { IConfig } from "./typings/config";
 // TODO: this should be done properly
 const config = c as IConfig;
 
+let createdContracts: string[];
+
 const code = async () =>  {
     const txsRaw = await getTransactions(config.wallets);
     txsRaw.sort(sortTable);
+    createdContracts = txsRaw.filter((txRaw) => txRaw.contractAddress !== "").map((txRaw) => txRaw.contractAddress);
     const txsParsed = parseTransactions(txsRaw);
     const txsFinal = await computeTransactions(txsParsed);
     writeToFile(txsFinal);
@@ -35,15 +38,17 @@ const computeTransactions = async (transactions: IParsedTransaction[]): Promise<
         const ethPrice = prices[txDate];
 
         let localTo = undefined !== config.wallets.find((elm) => {
-            return elm.toLowerCase() === tx.to;
+            return elm.toLowerCase() === tx.to.toLowerCase();
         });
 
-        localTo = localTo || undefined !== config.contracts.find((elm) => {
-            return elm.toLowerCase() === tx.to;
+        localTo = localTo || undefined !== createdContracts.find((elm) => {
+            return elm.toLowerCase() === tx.to.toLowerCase();
         });
+
+        localTo = localTo || tx.contractCreation;
 
         const localFrom = undefined !== config.wallets.find((elm) => {
-            return elm.toLowerCase() === tx.from;
+            return elm.toLowerCase() === tx.from.toLowerCase();
         });
 
         let txType: TxType = null;

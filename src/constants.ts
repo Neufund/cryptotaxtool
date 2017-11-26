@@ -15,6 +15,7 @@ export enum TxType {
 export const dateFormat = "YYYY-MM-DD";
 
 export interface IRawTransaction {
+    contractAddress: string;
     from: string;
     gasPrice: string;
     gasUsed: string;
@@ -26,6 +27,7 @@ export interface IRawTransaction {
 }
 
 export interface IParsedTransaction {
+    contractCreation: boolean;
     date: Moment;
     from: string;
     gasEth: BigNumber;
