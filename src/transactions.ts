@@ -5,29 +5,29 @@ import fetch from "node-fetch";
 import * as Web3 from "web3";
 
 import * as c from "../config.json";
+import { IParsedTransaction, IRawTransaction } from "./constants";
 import {IConfig} from "./typings/config";
 
 // TODO: this should be done properly
 const config = c as IConfig;
 
-export const getTransactions = async (wallets: [string]): Promise<any[]> => {
-    let ret: any[] = [];
+export const getTransactions = async (wallets: [string]): Promise<IRawTransaction[]> => {
+    let ret: IRawTransaction[] = [];
     for (const wallet of wallets) {
         const addresss = getEtherScanApiTxURL(wallet);
         console.log(`getting transactions for: ${wallet}`);
         const txs = await fetch(addresss).then((res) => {
             return res.json();
         });
-        ret = ret.concat(txs.result.map((tx: any) => {
+        ret = ret.concat(txs.result.map((tx: any): IRawTransaction => {
             return {
                 from: tx.from,
                 gasPrice: tx.gasPrice,
                 gasUsed: tx.gasUsed,
                 hash: tx.hash,
-                issuedTx: tx.from === wallet.toLowerCase(),
                 timeStamp: tx.timeStamp,
                 to: tx.to,
-                txFailed: tx.txreceipt_status === "0",
+                txreceipt_status: tx.txreceipt_status,
                 value: tx.value,
             };
         }));
@@ -40,23 +40,21 @@ const getEtherScanApiTxURL = (publicKey: string): string => {
     return `http://api.etherscan.io/api?module=account&action=txlist&address=${publicKey}&startblock=${config.startBlock}&sort=asc&apikey=${config.ethScanApiKey}`;
 };
 
-export const parseTransactions = (transactions: any) => {
+export const parseTransactions = (transactions: IRawTransaction[]): IParsedTransaction[] => {
     const web3 = new Web3();
-    const ret: any[] = [];
+    const ret: IParsedTransaction[] = [];
     for (const tx of transactions) {
         const parsedTx = {
-            date: Moment.unix(tx.timeStamp).format("YYYY-MM-DD"),
+            date: Moment.unix(parseInt(tx.timeStamp, 10)),
             from: tx.from,
-            gasEth: 0,
+            gasEth: new BigNumber(0),
             gasPrice: new BigNumber(tx.gasPrice),
-            gasUsed: tx.issuedTx ? new BigNumber(tx.gasUsed) : new BigNumber(0),
+            gasUsed: new BigNumber(tx.gasUsed),
             hash: tx.hash,
             to: tx.to,
-            value: tx.txFailed ? new BigNumber(0) : new BigNumber(tx.value),
+            txFailed: tx.txreceipt_status === "0",
+            value: new BigNumber(tx.value),
         };
-        if (tx.issuedTx) {
-            parsedTx.value = parsedTx.value.neg();
-        }
         parsedTx.gasEth = web3.fromWei(parsedTx.gasPrice.times(parsedTx.gasUsed), "ether");
         parsedTx.value = web3.fromWei(parsedTx.value, "ether");
         ret.push(parsedTx);

@@ -1,8 +1,9 @@
 import { writeFile} from "fs";
 import * as json2csv from "json2csv";
+import * as Moment from "moment";
 
 import * as c from "../config.json";
-import { Currency } from "./constants";
+import { Currency, dateFormat, IComputedTransaction, IParsedTransaction, IRawTransaction, TxType } from "./constants";
 import { ethPrices } from "./ethPrices";
 import { getTransactions , parseTransactions } from "./transactions";
 import { IConfig } from "./typings/config";
@@ -11,51 +12,75 @@ import { IConfig } from "./typings/config";
 const config = c as IConfig;
 
 const code = async () =>  {
-    const txs = await getTransactions(config.wallets);
-    txs.sort(sortTable);
-    const txParsed = parseTransactions(txs);
-    const txFinal = await computeFiatValueAndLocality(txParsed);
-    writeToFile(txFinal);
+    const txsRaw = await getTransactions(config.wallets);
+    txsRaw.sort(sortTable);
+    const txsParsed = parseTransactions(txsRaw);
+    const txsFinal = await computeTransactions(txsParsed);
+    writeToFile(txsFinal);
 
 };
 
 code().catch((err) => console.log(err));
 
-const sortTable = (a: any, b: any) => {
+const sortTable = (a: IRawTransaction, b: IRawTransaction): number => {
     const timeStampA = parseInt(a.timeStamp, 10);
     const timeStampB = parseInt(b.timeStamp, 10);
     return timeStampA - timeStampB;
 };
 
-const computeFiatValueAndLocality = async (transactions: any) => {
-    const prices = await ethPrices(transactions[0].date, Currency.USD);
+const computeTransactions = async (transactions: IParsedTransaction[]): Promise<IComputedTransaction[]> => {
+    const prices = await ethPrices(transactions[0].date.format(dateFormat), Currency.USD);
 
-    return transactions.map((tx: any) => {
-        const ethPrice = prices[tx.date];
-        const localTo = undefined !== config.wallets.find((elm) => {
+    const txs = transactions.map((tx) => {
+        const txDate = tx.date.format(dateFormat);
+        const ethPrice = prices[txDate];
+
+        let localTo = undefined !== config.wallets.find((elm) => {
+            return elm.toLowerCase() === tx.to;
+        });
+
+        localTo = localTo || undefined !== config.contracts.find((elm) => {
             return elm.toLowerCase() === tx.to;
         });
 
         const localFrom = undefined !== config.wallets.find((elm) => {
             return elm.toLowerCase() === tx.from;
         });
-        const local = localFrom && localTo;
+
+        let txType: TxType = null;
+        if (localFrom && localTo) {
+            txType = TxType.LOCAL;
+        } else if (localFrom) {
+            txType = TxType.OUTGOING;
+        } else if (localTo) {
+            txType = TxType.INCOMING;
+        } else {
+            throw new Error("transaction not FROM nor TO our wallet");
+        }
+
+        // we omit incomming filed transactions
+        if (txType === TxType.INCOMING && tx.txFailed) {
+            return null;
+        }
 
         return {
-            date: tx.date,
+            date: txDate,
             hash: tx.hash,
-            local,
-            txCostFiat: tx.gasEth.times(ethPrice).toString(),
-            txValueFiat: tx.value.times(ethPrice).toString(),
+            txCostFiat: txType === TxType.INCOMING ? "0" : tx.gasEth.times(ethPrice).toFixed(4),
+            txValueFiat: tx.txFailed ? "0" : tx.value.times(ethPrice).toFixed(4),
+            type: txType,
         };
     });
+
+    const res = txs.filter((tx) => tx !== null);
+    return Promise.resolve(res);
 };
 
 const writeToFile = (transactions: any) => {
-    const fields = ["hash", "date", "txCostFiat", "txValueFiat", "local"];
+    const fields = ["hash", "date", "txCostFiat", "txValueFiat", "type"];
     const csv = json2csv({ data: transactions, fields });
 
-    writeFile("file.csv", csv, (err) => {
+    writeFile("./outcome/transactions.csv", csv, (err) => {
         if (err) {
             throw err;
         }
