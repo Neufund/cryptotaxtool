@@ -1,6 +1,5 @@
 import { writeFile} from "fs";
 import * as json2csv from "json2csv";
-import * as Moment from "moment";
 
 import * as c from "../config.json";
 import { Currency, dateFormat, IComputedTransaction, IParsedTransaction, IRawTransaction, TxType } from "./constants";

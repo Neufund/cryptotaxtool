@@ -1,5 +1,6 @@
 import { BigNumber } from "bignumber.js";
 import {delay} from "bluebird";
+import { uniqBy } from "lodash";
 import * as Moment from "moment";
 import fetch from "node-fetch";
 import * as Web3 from "web3";
@@ -12,14 +13,14 @@ import {IConfig} from "./typings/config";
 const config = c as IConfig;
 
 export const getTransactions = async (wallets: [string]): Promise<IRawTransaction[]> => {
-    let ret: IRawTransaction[] = [];
+    let allTxs: IRawTransaction[] = [];
     for (const wallet of wallets) {
         const addresss = getEtherScanApiTxURL(wallet);
         console.log(`getting transactions for: ${wallet}`);
         const txs = await fetch(addresss).then((res) => {
             return res.json();
         });
-        ret = ret.concat(txs.result.map((tx: any): IRawTransaction => {
+        allTxs = allTxs.concat(txs.result.map((tx: any): IRawTransaction => {
             return {
                 from: tx.from,
                 gasPrice: tx.gasPrice,
@@ -33,7 +34,8 @@ export const getTransactions = async (wallets: [string]): Promise<IRawTransactio
         }));
         await delay(300);
     }
-    return Promise.resolve(ret);
+    const removedDups = uniqBy(allTxs, "hash");
+    return Promise.resolve(removedDups);
 };
 
 const getEtherScanApiTxURL = (publicKey: string): string => {

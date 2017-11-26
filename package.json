@@ -8,6 +8,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/bluebird": "^3.5.18",
+    "@types/lodash": "^4.14.85",
     "@types/moment": "^2.13.0",
     "@types/node": "^8.0.53",
     "@types/node-fetch": "^1.6.7",
@@ -22,6 +23,7 @@
     "bignumber.js": "^4.1.0",
     "bluebird": "^3.5.1",
     "json2csv": "^3.11.5",
+    "lodash": "^4.17.4",
     "moment": "^2.19.2",
     "node-fetch": "^1.7.3",
     "web3": "0.19.0"
