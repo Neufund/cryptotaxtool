@@ -1,4 +1,4 @@
-import { writeFile} from "fs";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 import * as json2csv from "json2csv";
 
 import * as c from "../config.json";
@@ -79,10 +79,10 @@ const writeToFile = (transactions: any) => {
     const fields = ["hash", "date", "txCostFiat", "txValueFiat", "type"];
     const csv = json2csv({ data: transactions, fields });
 
-    writeFile("./outcome/transactions.csv", csv, (err) => {
-        if (err) {
-            throw err;
-        }
-        console.log("file saved");
-    });
+    if (!existsSync("./outcome")) {
+        mkdirSync("./outcome");
+    }
+
+    writeFileSync("./outcome/transactions.csv", csv);
+    console.log("file saved");
 };
