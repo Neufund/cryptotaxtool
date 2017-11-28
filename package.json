@@ -22,6 +22,7 @@
   "dependencies": {
     "bignumber.js": "^4.1.0",
     "bluebird": "^3.5.1",
+    "commander": "^2.12.2",
     "json2csv": "^3.11.5",
     "lodash": "^4.17.4",
     "moment": "^2.19.2",
