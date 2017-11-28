@@ -1,0 +1,14 @@
+{
+  "startBlock": 0,
+  "ethScanApiKey": "your EtherScan api key",
+  "wallets": [
+    {
+      "address":"0x0000000000000000000000000000000000000000",
+      "alias": "alias1"
+    },
+    {
+      "address":"0x0000000000000000000000000000000000000000",
+      "alias": "alias2"
+    }
+  ]
+}
