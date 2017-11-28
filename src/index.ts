@@ -2,8 +2,16 @@ import { existsSync, mkdirSync, writeFileSync } from "fs";
 import * as json2csv from "json2csv";
 
 import * as c from "../config.json";
-import { Currency, dateFormat, IComputedTransaction, IParsedTransaction, IRawTransaction, TxType } from "./constants";
-import { ethPrices } from "./ethPrices";
+import {
+    CryptoCurrency,
+    dateFormat,
+    FiatCurrency,
+    IComputedTransaction,
+    IParsedTransaction,
+    IRawTransaction,
+    TxType,
+} from "./constants";
+import { cryptoCurrencyPrices } from "./currencyPrices";
 import { getTransactions , parseTransactions } from "./transactions";
 import { IConfig } from "./typings/config";
 
@@ -32,7 +40,10 @@ const sortTable = (a: IRawTransaction, b: IRawTransaction): number => {
 };
 
 const computeTransactions = async (transactions: IParsedTransaction[]): Promise<IComputedTransaction[]> => {
-    const prices = await ethPrices(transactions[0].date.format(dateFormat), Currency.EUR);
+    const prices = await cryptoCurrencyPrices(
+        transactions[0].date.format(dateFormat),
+        CryptoCurrency.ETH,
+        FiatCurrency.EUR);
 
     const txs = transactions.map((tx) => {
         const txDate = tx.date.format(dateFormat);
