@@ -20,11 +20,13 @@ async function main() {
 
     const startDate = Moment(program.date, dateFormat);
 
-    const btc = await cryptoCurrencyPrices(startDate.toISOString(), CryptoCurrency.BTC, FiatCurrency.EUR);
-    const etc = await cryptoCurrencyPrices(startDate.toISOString(), CryptoCurrency.ETC, FiatCurrency.EUR);
-    const eth = await cryptoCurrencyPrices(startDate.toISOString(), CryptoCurrency.ETH, FiatCurrency.EUR);
-    const rep = await cryptoCurrencyPrices(startDate.toISOString(), CryptoCurrency.REP, FiatCurrency.EUR);
-    const xmr = await cryptoCurrencyPrices(startDate.toISOString(), CryptoCurrency.XMR, FiatCurrency.EUR);
+    const [btc, etc, eth, rep, xmr] = await Promise.all([
+        cryptoCurrencyPrices(startDate.toISOString(), CryptoCurrency.BTC, FiatCurrency.EUR),
+        cryptoCurrencyPrices(startDate.toISOString(), CryptoCurrency.ETC, FiatCurrency.EUR),
+        cryptoCurrencyPrices(startDate.toISOString(), CryptoCurrency.ETH, FiatCurrency.EUR),
+        cryptoCurrencyPrices(startDate.toISOString(), CryptoCurrency.REP, FiatCurrency.EUR),
+        cryptoCurrencyPrices(startDate.toISOString(), CryptoCurrency.XMR, FiatCurrency.EUR),
+    ]);
 
     const data = [];
 
