@@ -1,12 +1,16 @@
 import * as Moment from "moment";
 import fetch from "node-fetch";
 
-import { Currency } from "./constants";
+import { CryptoCurrency, FiatCurrency } from "./constants";
 
-export const ethPrices = async (startDate: string, currency: Currency) => {
-    console.log(`getting prices from Kraken starting from: ${startDate} in ${currency}`);
+export const cryptoCurrencyPrices = async (
+    startDate: string,
+    cryptoCurrency: CryptoCurrency,
+    fiatCurrency: FiatCurrency,
+) => {
+    console.log(`getting prices of ${cryptoCurrency} from Kraken starting from: ${startDate} in ${fiatCurrency}`);
     const startDateParsed = Moment(startDate);
-    const currencySymbol = currency === Currency.USD ? "XETHZUSD" : "XETHZEUR";
+    const currencySymbol = krakenCoinPairSymbol(cryptoCurrency, fiatCurrency);
     const url = `https://api.kraken.com/0/public/OHLC?pair=${currencySymbol}&since=${startDateParsed.unix()}&interval=1440`;
     return fetch(url)
         .then((res) => res.json())
@@ -27,4 +31,12 @@ export const ethPrices = async (startDate: string, currency: Currency) => {
             // console.log(prices);
             return prices;
         });
+};
+
+const krakenCoinPairSymbol = (cryptoCurrency: CryptoCurrency, fiatCurrency: FiatCurrency) => {
+    if (cryptoCurrency === CryptoCurrency.BTC) {
+      return `XXBTZ${fiatCurrency}`;
+    } else {
+        return `X${cryptoCurrency}Z${fiatCurrency}`;
+    }
 };

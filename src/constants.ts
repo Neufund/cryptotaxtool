@@ -1,9 +1,17 @@
 import BigNumber from "bignumber.js";
 import { Moment } from "moment";
 
-export enum Currency {
+export enum FiatCurrency {
     EUR = "EUR",
     USD = "USD",
+}
+
+export enum CryptoCurrency {
+    BTC = "BTC",
+    ETC = "ETC",
+    ETH = "ETH",
+    REP = "REP",
+    XMR = "XMR",
 }
 
 export enum TxType {
