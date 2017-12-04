@@ -58,6 +58,7 @@ export interface IComputedTransaction {
     txValueFiat: string;
     txTotalETH: string;
     txTotalFiat: string;
+    ethPrice: string;
     type: TxType;
     desc?: string;
 }

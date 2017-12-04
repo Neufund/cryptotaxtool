@@ -71,6 +71,7 @@ export const computeTransactions = async (
 
         const computedTx: IComputedTransaction = {
             date: txDate,
+            ethPrice: ethPrice.toFixed(4),
             from: fromName,
             hash: tx.hash,
             to: toName,

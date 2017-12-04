@@ -33,7 +33,7 @@ const sortTable = (a: IRawTransaction, b: IRawTransaction): number => {
 };
 
 const writeToFile = (transactions: any) => {
-    const fields = ["date", "hash", "from", "to", "txCostETH", "txValueETH", "txTotalETH",  "txCostFiat", "txValueFiat", "txTotalFiat", "type", "desc"];
+    const fields = ["date", "hash", "from", "to", "txCostETH", "txValueETH", "txTotalETH",  "txCostFiat", "txValueFiat", "txTotalFiat", "ethPrice", "type", "desc"];
     const csv = json2csv({ data: transactions, fields });
 
     if (!existsSync("./outcome")) {
