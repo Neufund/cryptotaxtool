@@ -33,8 +33,35 @@ const sortTable = (a: IRawTransaction, b: IRawTransaction): number => {
 };
 
 const writeToFile = (transactions: any) => {
-    const fields = ["date", "hash", "from", "to", "txCostETH", "txValueETH", "txTotalETH",  "txCostFiat", "txValueFiat", "txTotalFiat", "ethPrice", "type", "desc"];
-    const csv = json2csv({ data: transactions, fields });
+    const fields = [
+        "date",
+        "hash",
+        "from",
+        "to",
+        "txCostETH",
+        "txValueETH",
+        "txTotalETH",
+        "txCostFiat",
+        "txValueFiat",
+        "txTotalFiat",
+        "ethPrice",
+        "type",
+        "desc"];
+    const fieldNames = [
+        "Date",
+        "Transaction id",
+        "Sender",
+        "Receiver",
+        "Transaction cost in ETH",
+        "Transaction amount in ETH",
+        "Transaction total in ETH",
+        "Transaction cost in EUR",
+        "Transaction amount in EUR",
+        "Transaction total in EUR",
+        "ETH price from date in EUR (weighted average exchange rate)",
+        "Transaction type",
+        "Description"];
+    const csv = json2csv({ data: transactions, fields, fieldNames });
 
     if (!existsSync("./outcome")) {
         mkdirSync("./outcome");
