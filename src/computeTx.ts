@@ -1,3 +1,5 @@
+import BigNumber from "bignumber.js";
+
 import * as c from "../config.json";
 import {
     CryptoCurrency,
@@ -63,20 +65,21 @@ export const computeTransactions = async (
             continue;
         }
 
-        const txCostETH = txType === TxType.INCOMING ? "0" : tx.gasEth.toString();
-        const txCostFiat = txType === TxType.INCOMING ? "0" : tx.gasEth.times(ethPrice).toFixed(4);
-        const txValueETH = tx.txFailed ? "0" : tx.value.toString();
-        const txValueFiat = tx.txFailed ? "0" : tx.value.times(ethPrice).toFixed(4);
+        const txCostETH = txType === TxType.INCOMING ? new BigNumber(0) : tx.gasEth;
+        const txValueETH = tx.txFailed ? new BigNumber(0) : tx.value;
+        const txTotalETH = txCostETH.add(txValueETH);
 
         const computedTx: IComputedTransaction = {
             date: txDate,
             from: fromName,
             hash: tx.hash,
             to: toName,
-            txCostETH,
-            txCostFiat,
-            txValueETH,
-            txValueFiat,
+            txCostETH: txCostETH.toString(),
+            txCostFiat: txCostETH.times(ethPrice).toFixed(4),
+            txTotalETH: txTotalETH.toString(),
+            txTotalFiat: txTotalETH.times(ethPrice).toFixed(4),
+            txValueETH: txValueETH.toString(),
+            txValueFiat: txValueETH.times(ethPrice).toFixed(4),
             type: txType,
         };
 
