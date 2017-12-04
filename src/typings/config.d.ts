@@ -4,5 +4,6 @@ export interface IConfig {
     wallets: Array<{
         address: string;
         alias: string;
+        isDev?: boolean;
     }>;
 }

@@ -28,7 +28,6 @@ const code = async () =>  {
     const txsParsed = parseTransactions(txsRaw);
     const txsFinal = await computeTransactions(txsParsed);
     writeToFile(txsFinal);
-
 };
 
 code().catch((err) => console.log(err));
@@ -45,7 +44,9 @@ const computeTransactions = async (transactions: IParsedTransaction[]): Promise<
         CryptoCurrency.ETH,
         FiatCurrency.EUR);
 
-    const txs = transactions.map((tx) => {
+    const txs = [];
+
+    for (const tx of transactions) {
         const txDate = tx.date.format(dateFormat);
         const ethPrice = prices[txDate];
 
@@ -64,6 +65,8 @@ const computeTransactions = async (transactions: IParsedTransaction[]): Promise<
         const fromConfig = config.wallets.find((elm) => {
             return elm.address.toLowerCase() === tx.from.toLowerCase();
         });
+
+        const fromDevWallet = fromConfig !== undefined && fromConfig.isDev !== undefined && fromConfig.isDev;
         const fromName = (fromConfig !== undefined && fromConfig.alias !== "") ? fromConfig.alias : tx.from;
         const localFrom = fromConfig !== undefined;
 
@@ -80,28 +83,33 @@ const computeTransactions = async (transactions: IParsedTransaction[]): Promise<
 
         // we omit incoming failed transactions
         if (txType === TxType.INCOMING && tx.txFailed) {
-            return null;
+            continue;
         }
 
-        return {
+        const computedTx: IComputedTransaction = {
             date: txDate,
             from: fromName,
             hash: tx.hash,
             to: toName,
-            txCostETH: tx.gasEth.toString(),
+            txCostETH: txType === TxType.INCOMING ? "0" : tx.gasEth.toString(),
             txCostFiat: txType === TxType.INCOMING ? "0" : tx.gasEth.times(ethPrice).toFixed(4),
-            txValueETH: tx.value.toString(),
+            txValueETH: tx.txFailed ? "0" : tx.value.toString(),
             txValueFiat: tx.txFailed ? "0" : tx.value.times(ethPrice).toFixed(4),
             type: txType,
         };
-    });
 
-    const res = txs.filter((tx) => tx !== null);
-    return Promise.resolve(res);
+        if (fromDevWallet) {
+            computedTx.desc = "dev expense";
+        }
+
+        txs.push(computedTx);
+    }
+
+    return Promise.resolve(txs);
 };
 
 const writeToFile = (transactions: any) => {
-    const fields = ["hash", "from", "to", "txCostETH", "txValueETH", "date", "txCostFiat", "txValueFiat", "type"];
+    const fields = ["date", "hash", "from", "to", "txCostETH", "txValueETH", "txCostFiat", "txValueFiat", "type", "desc"];
     const csv = json2csv({ data: transactions, fields });
 
     if (!existsSync("./outcome")) {

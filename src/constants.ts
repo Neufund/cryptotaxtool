@@ -20,6 +20,11 @@ export enum TxType {
     OUTGOING = "OUTGOING",
 }
 
+export enum WalletType {
+    STANDARD = "STANDARD",
+    DEV = "DEV",
+}
+
 export const dateFormat = "YYYY-MM-DD";
 
 export interface IRawTransaction {
@@ -57,4 +62,5 @@ export interface IComputedTransaction {
     txValueETH: string;
     txValueFiat: string;
     type: TxType;
+    desc?: string;
 }
