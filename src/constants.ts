@@ -15,9 +15,9 @@ export enum CryptoCurrency {
 }
 
 export enum TxType {
-    INCOMING = "INCOMMING",
+    DEPOSIT = "DEPOSIT",
     LOCAL = "LOCAL",
-    OUTGOING = "OUTGOING",
+    EXPENSE = "EXPENSE",
 }
 
 export const dateFormat = "YYYY-MM-DD";
