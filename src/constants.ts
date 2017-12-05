@@ -15,9 +15,9 @@ export enum CryptoCurrency {
 }
 
 export enum TxType {
-    INCOMING = "INCOMMING",
+    DEPOSIT = "DEPOSIT",
     LOCAL = "LOCAL",
-    OUTGOING = "OUTGOING",
+    EXPENSE = "EXPENSE",
 }
 
 export const dateFormat = "YYYY-MM-DD";
@@ -56,5 +56,9 @@ export interface IComputedTransaction {
     txCostFiat: string;
     txValueETH: string;
     txValueFiat: string;
+    txTotalETH: string;
+    txTotalFiat: string;
+    ethPrice: string;
     type: TxType;
+    desc?: string;
 }
