@@ -12,35 +12,54 @@ import {IConfig} from "./typings/config";
 // TODO: this should be done properly
 const config = c as IConfig;
 
+const etherScanOffset = 1000;
+
 export const getTransactions = async (wallets: string[]): Promise<IRawTransaction[]> => {
     let allTxs: IRawTransaction[] = [];
     for (const wallet of wallets) {
-        const addresss = getEtherScanApiTxURL(wallet);
         console.log(`getting transactions for: ${wallet}`);
-        const txs = await fetch(addresss).then((res) => {
-            return res.json();
-        });
-        allTxs = allTxs.concat(txs.result.map((tx: any): IRawTransaction => {
-            return {
-                contractAddress: tx.contractAddress,
-                from: tx.from,
-                gasPrice: tx.gasPrice,
-                gasUsed: tx.gasUsed,
-                hash: tx.hash,
-                timeStamp: tx.timeStamp,
-                to: tx.to,
-                txreceipt_status: tx.txreceipt_status,
-                value: tx.value,
-            };
-        }));
-        await delay(300);
+        let page = 0;
+
+        while (true) {
+            page++;
+            const url = getEtherScanApiTxURL(wallet, page, etherScanOffset);
+            console.log(`getting page ${page} - ${url}`);
+            const txs = await fetch(url).then((res) => {
+                return res.json();
+            });
+            allTxs = allTxs.concat(txs.result.map((tx: any): IRawTransaction => {
+                return {
+                    contractAddress: tx.contractAddress,
+                    from: tx.from,
+                    gasPrice: tx.gasPrice,
+                    gasUsed: tx.gasUsed,
+                    hash: tx.hash,
+                    timeStamp: tx.timeStamp,
+                    to: tx.to,
+                    txreceipt_status: tx.txreceipt_status,
+                    value: tx.value,
+                };
+            }));
+            if (txs.result.length === 0) {
+                break;
+            }
+            await delay(300);
+        }
     }
     const removedDups = uniqBy(allTxs, "hash");
     return Promise.resolve(removedDups);
 };
 
-const getEtherScanApiTxURL = (publicKey: string): string => {
-    return `http://api.etherscan.io/api?module=account&action=txlist&address=${publicKey}&startblock=${config.startBlock}&sort=asc&apikey=${config.ethScanApiKey}`;
+const getEtherScanApiTxURL = (publicKey: string, page: number, offset: number): string => {
+    return `http://api.etherscan.io/api\
+?module=account\
+&action=txlist\
+&address=${publicKey}\
+&startblock=${config.startBlock}\
+&page=${page}\
+&offset=${offset}\
+&sort=asc\
+&apikey=${config.ethScanApiKey}`;
 };
 
 export const parseTransactions = (transactions: IRawTransaction[]): IParsedTransaction[] => {
