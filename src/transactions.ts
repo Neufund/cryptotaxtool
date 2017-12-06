@@ -40,7 +40,7 @@ export const getTransactions = async (wallets: string[]): Promise<IRawTransactio
                     value: tx.value,
                 };
             }));
-            if (txs.result.length === 0) {
+            if (txs.result.length < etherScanOffset) {
                 break;
             }
             await delay(300);
