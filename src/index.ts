@@ -48,19 +48,19 @@ const writeToFile = (transactions: any) => {
         "type",
         "desc"];
     const fieldNames = [
-        "Date",
-        "Transaction id",
-        "Sender",
-        "Receiver",
-        "Transaction cost in ETH",
-        "Transaction amount in ETH",
-        "Transaction total in ETH",
-        "Transaction cost in EUR",
-        "Transaction amount in EUR",
-        "Transaction total in EUR",
-        "ETH price from date in EUR (weighted average exchange rate)",
-        "Transaction type",
-        "Description"];
+        `Date`,
+        `Transaction id`,
+        `Sender`,
+        `Receiver`,
+        `Transaction cost in ETH`,
+        `Transaction amount in ETH`,
+        `Transaction total in ETH`,
+        `Transaction cost in ${config.fiatCurrency}`,
+        `Transaction amount in ${config.fiatCurrency}`,
+        `Transaction total in ${config.fiatCurrency}`,
+        `ETH price from date in ${config.fiatCurrency} (weighted average exchange rate)`,
+        `Transaction type`,
+        `Description`];
     const csv = json2csv({ data: transactions, fields, fieldNames });
 
     if (!existsSync("./outcome")) {

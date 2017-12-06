@@ -21,7 +21,7 @@ export const computeTransactions = async (
     const prices = await cryptoCurrencyPrices(
         transactions[0].date.format(dateFormat),
         CryptoCurrency.ETH,
-        FiatCurrency.EUR);
+        config.fiatCurrency);
 
     const txs = [];
 

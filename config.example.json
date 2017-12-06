@@ -1,6 +1,7 @@
 {
   "startBlock": 0,
   "ethScanApiKey": "your EtherScan api key",
+  "fiatCurrency": "EUR",
   "wallets": [
     {
       "address":"0x0000000000000000000000000000000000000000",

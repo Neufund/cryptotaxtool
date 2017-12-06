@@ -1,3 +1,5 @@
+import { FiatCurrency } from "../constants";
+
 export interface IConfig {
     startBlock: string;
     ethScanApiKey: string;
@@ -6,4 +8,5 @@ export interface IConfig {
         alias: string;
         isDev?: boolean;
     }>;
+    fiatCurrency: FiatCurrency;
 }
