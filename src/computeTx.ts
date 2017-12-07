@@ -4,7 +4,6 @@ import * as c from "../config.json";
 import {
     CryptoCurrency,
     dateFormat,
-    FiatCurrency,
     IComputedTransaction,
     IParsedTransaction,
     TxType,

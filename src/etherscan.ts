@@ -11,6 +11,8 @@ import {IConfig} from "./typings/config";
 
 // TODO: this should be done properly
 const config = c as IConfig;
+const startMoment = Moment(config.startDate);
+const endMoment = Moment(config.endDate);
 
 const etherScanOffset = 1000;
 const blockIntervalSeconds = 14;
@@ -53,7 +55,10 @@ export const getTransactions = async (wallets: string[]): Promise<IRawTransactio
         }
     }
     const removedDups = uniqBy(allTxs, "hash");
-    return Promise.resolve(removedDups);
+    const filteredByDate = removedDups.filter(filterDate);
+    filteredByDate.sort(comparatorTimestamp);
+
+    return Promise.resolve(filteredByDate);
 };
 
 const findStartingBlock = async (date: Moment.Moment): Promise<number> => {
@@ -94,6 +99,15 @@ const getEtherScanApiTxURL = (publicKey: string, startBlock: number, page: numbe
 &sort=asc\
 &apikey=${config.ethScanApiKey}`;
 };
+
+const comparatorTimestamp = (a: IRawTransaction, b: IRawTransaction): number => {
+    const timeStampA = parseInt(a.timeStamp, 10);
+    const timeStampB = parseInt(b.timeStamp, 10);
+    return timeStampA - timeStampB;
+};
+
+const filterDate = (tx: IRawTransaction): boolean =>
+    Moment.unix(parseInt(tx.timeStamp, 10)).isBetween(startMoment, endMoment, "days", "[]");
 
 export const parseTransactions = (transactions: IRawTransaction[]): IParsedTransaction[] => {
     const web3 = new Web3();
