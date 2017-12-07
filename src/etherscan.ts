@@ -18,10 +18,10 @@ const etherScanOffset = 1000;
 const blockIntervalSeconds = 14;
 
 export const getTransactions = async (wallets: string[]): Promise<IRawTransaction[]> => {
-    console.log(`Looking for starting block for date ${config.startDate}`);
-    const startTime = Moment(config.startDate);
-    const startBlock = await findStartingBlock(startTime);
-    console.log(`Starging block ${startBlock}`);
+    console.log(`Looking for border blocks for dates from: ${config.startDate} to: ${config.endDate}`);
+    const startBlock = await findStartBlock(startMoment);
+    const endBlock = await findEndBlock(endMoment);
+    console.log(`Blocks between: ${startBlock} - ${endBlock}`);
 
     let allTxs: IRawTransaction[] = [];
     for (const wallet of wallets) {
@@ -30,7 +30,7 @@ export const getTransactions = async (wallets: string[]): Promise<IRawTransactio
 
         while (true) {
             page++;
-            const url = getEtherScanApiTxURL(wallet, startBlock, page, etherScanOffset);
+            const url = getEtherScanApiTxURL(wallet, startBlock, endBlock, page, etherScanOffset);
             console.log(`page ${page} - ${url}`);
             const txs = await fetch(url).then((res) => {
                 return res.json();
@@ -61,14 +61,26 @@ export const getTransactions = async (wallets: string[]): Promise<IRawTransactio
     return Promise.resolve(filteredByDate);
 };
 
-const findStartingBlock = async (date: Moment.Moment): Promise<number> => {
+const findStartBlock = async (date: Moment.Moment): Promise<number> => {
     let blockNumber = await getNewestBlockNumber();
     let blockDate = await getBlockDateByNumber(blockNumber);
 
     while (blockDate.isSameOrAfter(date) || Math.abs(blockDate.diff(date, "days", true)) > 1) {
-
         const blockDiff = blockDate.diff(date, "seconds") / blockIntervalSeconds;
         blockNumber = Math.floor(blockNumber - blockDiff);
+        blockDate = await getBlockDateByNumber(blockNumber);
+    }
+
+    return Promise.resolve(blockNumber);
+};
+
+const findEndBlock = async (date: Moment.Moment): Promise<number> => {
+    let blockNumber = await getNewestBlockNumber();
+    let blockDate = await getBlockDateByNumber(blockNumber);
+
+    while (blockDate.isSameOrBefore(date) || Math.abs(blockDate.diff(date, "days", true)) > 1) {
+        const blockDiff = blockDate.diff(date, "seconds") / blockIntervalSeconds;
+        blockNumber = Math.ceil(blockNumber - blockDiff);
         blockDate = await getBlockDateByNumber(blockNumber);
     }
 
@@ -88,12 +100,18 @@ const getBlockDateByNumber = async (blockNumber: number): Promise<Moment.Moment>
     .then((res) => Moment.unix(parseInt(res.result.timestamp, 16)));
 };
 
-const getEtherScanApiTxURL = (publicKey: string, startBlock: number, page: number, offset: number): string => {
+const getEtherScanApiTxURL = (
+    publicKey: string,
+    startBlock: number,
+    endBlock: number,
+    page: number,
+    offset: number): string => {
     return `http://api.etherscan.io/api\
 ?module=account\
 &action=txlist\
 &address=${publicKey}\
 &startblock=${startBlock}\
+&endblock=${endBlock}\
 &page=${page}\
 &offset=${offset}\
 &sort=asc\
