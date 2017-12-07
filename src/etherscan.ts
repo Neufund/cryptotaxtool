@@ -13,8 +13,14 @@ import {IConfig} from "./typings/config";
 const config = c as IConfig;
 
 const etherScanOffset = 1000;
+const blockIntervalSeconds = 14;
 
 export const getTransactions = async (wallets: string[]): Promise<IRawTransaction[]> => {
+    console.log(`Looking for starting block for date ${config.startDate}`);
+    const startTime = Moment(config.startDate);
+    const startBlock = await findStartingBlock(startTime);
+    console.log(`Starging block ${startBlock}`);
+
     let allTxs: IRawTransaction[] = [];
     for (const wallet of wallets) {
         console.log(`getting transactions for: ${wallet}`);
@@ -22,8 +28,8 @@ export const getTransactions = async (wallets: string[]): Promise<IRawTransactio
 
         while (true) {
             page++;
-            const url = getEtherScanApiTxURL(wallet, page, etherScanOffset);
-            console.log(`getting page ${page} - ${url}`);
+            const url = getEtherScanApiTxURL(wallet, startBlock, page, etherScanOffset);
+            console.log(`page ${page} - ${url}`);
             const txs = await fetch(url).then((res) => {
                 return res.json();
             });
@@ -50,12 +56,39 @@ export const getTransactions = async (wallets: string[]): Promise<IRawTransactio
     return Promise.resolve(removedDups);
 };
 
-const getEtherScanApiTxURL = (publicKey: string, page: number, offset: number): string => {
+const findStartingBlock = async (date: Moment.Moment): Promise<number> => {
+    let blockNumber = await getNewestBlockNumber();
+    let blockDate = await getBlockDateByNumber(blockNumber);
+
+    while (blockDate.isSameOrAfter(date) || Math.abs(blockDate.diff(date, "days", true)) > 1) {
+
+        const blockDiff = blockDate.diff(date, "seconds") / blockIntervalSeconds;
+        blockNumber = Math.floor(blockNumber - blockDiff);
+        blockDate = await getBlockDateByNumber(blockNumber);
+    }
+
+    return Promise.resolve(blockNumber);
+};
+
+const getNewestBlockNumber = async (): Promise<number> => {
+    return fetch("https://api.etherscan.io/api?module=proxy&action=eth_blockNumber")
+        .then((res) => res.json())
+        .then((res) => parseInt(res.result, 16));
+};
+
+const getBlockDateByNumber = async (blockNumber: number): Promise<Moment.Moment> => {
+    return fetch(`https://api.etherscan.io/api?module=proxy&action=eth_getBlockByNumber\
+&tag=${blockNumber.toString(16)}&boolean=true&apikey=${config.ethScanApiKey}`)
+    .then((res) => res.json())
+    .then((res) => Moment.unix(parseInt(res.result.timestamp, 16)));
+};
+
+const getEtherScanApiTxURL = (publicKey: string, startBlock: number, page: number, offset: number): string => {
     return `http://api.etherscan.io/api\
 ?module=account\
 &action=txlist\
 &address=${publicKey}\
-&startblock=${config.startBlock}\
+&startblock=${startBlock}\
 &page=${page}\
 &offset=${offset}\
 &sort=asc\

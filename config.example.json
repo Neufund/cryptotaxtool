@@ -1,5 +1,6 @@
 {
-  "startBlock": 0,
+  "startDate": "YYYY-MM-DD",
+  "endDate": "YYYY-MM-DD",
   "ethScanApiKey": "your EtherScan api key",
   "fiatCurrency": "EUR",
   "wallets": [

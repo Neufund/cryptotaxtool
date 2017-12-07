@@ -1,7 +1,8 @@
 import { FiatCurrency } from "../constants";
 
 export interface IConfig {
-    startBlock: string;
+    startDate: string;
+    endDate: string;
     ethScanApiKey: string;
     wallets: Array<{
         address: string;
