@@ -9,5 +9,9 @@ export interface IConfig {
         alias: string;
         isDev?: boolean;
     }>;
+    contracts: Array<{
+        address: string;
+        alias: string;
+    }>;
     fiatCurrency: FiatCurrency;
 }
