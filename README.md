@@ -25,4 +25,4 @@ Configuration is stored in `config.json` you need to create one by yourself. We 
 - **wallets** For those addresses script will obtain transactions. You can provide `alias` which will be used instead of address on outcome list. Second optional option is `"isDev": true`. If you mark address with it `description` column will start with `dev expenses`. We use it in our company to distinguish dev addresses from ops ones.
 - **contracts** You can provide list of contracts with aliases. Those will be treated as **local** transactions and alias will be used as **to** field.
 ### Runing
-Just issue `yarn run` command and script will start working and gather all required information. It will crate `outcome` directory with `trasactions.csv` file.
+Just issue `yarn start` command and script will start working and gather all required information. It will crate `./outcome` directory with `trasactions.csv` file.
