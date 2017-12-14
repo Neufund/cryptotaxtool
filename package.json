@@ -12,12 +12,13 @@
     "@types/moment": "^2.13.0",
     "@types/node": "^8.0.53",
     "@types/node-fetch": "^1.6.7",
+    "ts-node": "^4.0.1",
     "tslint": "^5.8.0",
     "typescript": "^2.6.1"
   },
   "scripts": {
     "build": "rm -rf ./build && tsc",
-    "start": "yarn build && node ./dist/index.js"
+    "start": "ts-node ./src/index.ts"
   },
   "dependencies": {
     "bignumber.js": "^4.1.0",

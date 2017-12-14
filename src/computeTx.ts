@@ -4,7 +4,6 @@ import * as c from "../config.json";
 import {
     CryptoCurrency,
     dateFormat,
-    FiatCurrency,
     IComputedTransaction,
     IParsedTransaction,
     TxType,
@@ -17,11 +16,14 @@ const config = c as IConfig;
 
 export const computeTransactions = async (
     transactions: IParsedTransaction[],
-    createdContracts: string[]): Promise<IComputedTransaction[]> => {
+    contracts: Array<{
+        address: string;
+        alias: string;
+    }>): Promise<IComputedTransaction[]> => {
     const prices = await cryptoCurrencyPrices(
         transactions[0].date.format(dateFormat),
         CryptoCurrency.ETH,
-        FiatCurrency.EUR);
+        config.fiatCurrency);
 
     const txs = [];
 
@@ -32,14 +34,27 @@ export const computeTransactions = async (
         const toConfig = config.wallets.find((elm) => {
             return elm.address.toLowerCase() === tx.to.toLowerCase();
         });
-        const toName = (toConfig !== undefined && toConfig.alias !== "") ? toConfig.alias : tx.to;
+        let localTo = false;
+        let toName = tx.to;
 
-        let localTo = toConfig !== undefined;
-        localTo = localTo || undefined !== createdContracts.find((elm) => {
-            return elm.toLowerCase() === tx.to.toLowerCase();
+        if (toConfig !== undefined) {
+            localTo = true;
+            if (toConfig.alias !== "") {
+                toName = toConfig.alias;
+            }
+        }
+
+        const toContract = contracts.find((elm) => {
+            return elm.address.toLowerCase() === tx.to.toLowerCase();
         });
 
-        localTo = localTo || tx.contractCreation;
+        if (tx.contractCreation) {
+            localTo = true;
+            toName = "contract creation";
+        } else if (toContract !== undefined) {
+            localTo = true;
+            toName = toContract.alias !== "" ? toContract.alias : toContract.address;
+        }
 
         const fromConfig = config.wallets.find((elm) => {
             return elm.address.toLowerCase() === tx.from.toLowerCase();
