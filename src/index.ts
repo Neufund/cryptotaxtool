@@ -4,6 +4,7 @@ import * as json2csv from "json2csv";
 import * as c from "../config.json";
 import { computeTransactions } from "./computeTx";
 import { getTransactions , parseTransactions } from "./etherscan";
+import { findKrakenTxs } from "./kraken";
 import { IConfig } from "./typings/config";
 
 // TODO: this should be done properly
@@ -20,8 +21,11 @@ const code = async () =>  {
     }));
     contracts = contracts.concat(newContracts);
     const txsParsed = parseTransactions(txsRaw);
-    const txsFinal = await computeTransactions(txsParsed, contracts);
-    writeToFile(txsFinal);
+    let txsComputed = await computeTransactions(txsParsed, contracts);
+    if (config.kraken.enabled) {
+        txsComputed = await findKrakenTxs(txsComputed);
+    }
+    writeToFile(txsComputed);
     displayNewContracts(newContracts);
 };
 
