@@ -25,6 +25,7 @@
     "bluebird": "^3.5.1",
     "commander": "^2.12.2",
     "json2csv": "^3.11.5",
+    "kraken-exchange": "^1.3.2",
     "lodash": "^4.17.4",
     "moment": "^2.19.2",
     "node-fetch": "^1.7.3",

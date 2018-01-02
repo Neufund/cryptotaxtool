@@ -14,4 +14,9 @@ export interface IConfig {
         alias: string;
     }>;
     fiatCurrency: FiatCurrency;
+    kraken: {
+        enabled: boolean,
+        key: string,
+        secret: string,
+    };
 }
