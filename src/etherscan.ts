@@ -78,8 +78,15 @@ const findEndBlock = async (date: Moment.Moment): Promise<number> => {
     let blockNumber = await getNewestBlockNumber();
     let blockDate = await getBlockDateByNumber(blockNumber);
 
-    while (blockDate.isSameOrBefore(date) || Math.abs(blockDate.diff(date, "days", true)) > 1) {
-        const blockDiff = blockDate.diff(date, "seconds") / blockIntervalSeconds;
+    const compareDate = date.add(1, "days");
+
+    // if we are asking for data from future or today just return latest block number
+    if (compareDate.isAfter(blockDate)) {
+        return Promise.resolve(blockNumber);
+    }
+
+    while (blockDate.isSameOrBefore(compareDate) || Math.abs(blockDate.diff(compareDate, "days", true)) > 1) {
+        const blockDiff = blockDate.diff(compareDate, "seconds") / blockIntervalSeconds;
         blockNumber = Math.ceil(blockNumber - blockDiff);
         blockDate = await getBlockDateByNumber(blockNumber);
     }
