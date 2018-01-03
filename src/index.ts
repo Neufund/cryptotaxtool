@@ -1,14 +1,10 @@
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import * as json2csv from "json2csv";
 
-import * as c from "../config.json";
 import { computeTransactions } from "./computeTx";
+import { config } from "./config";
 import { getTransactions , parseTransactions } from "./etherscan";
 import { findKrakenTxs } from "./kraken";
-import { IConfig } from "./typings/config";
-
-// TODO: this should be done properly
-const config = c as IConfig;
 
 const code = async () =>  {
     let contracts = config.contracts;

@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
 
-import * as c from "../config.json";
+import { config } from "./config";
 import {
     CryptoCurrency,
     dateFormat,
@@ -9,10 +9,6 @@ import {
     TxType,
 } from "./constants";
 import { cryptoCurrencyPrices } from "./currencyPrices";
-import { IConfig } from "./typings/config";
-
-// TODO: this should be done properly
-const config = c as IConfig;
 
 export const computeTransactions = async (
     transactions: IParsedTransaction[],

@@ -5,22 +5,16 @@ import * as Moment from "moment";
 import fetch from "node-fetch";
 import * as Web3 from "web3";
 
-import * as c from "../config.json";
+import { config } from "./config";
 import { IParsedTransaction, IRawTransaction } from "./constants";
-import {IConfig} from "./typings/config";
-
-// TODO: this should be done properly
-const config = c as IConfig;
-const startMoment = Moment(config.startDate);
-const endMoment = Moment(config.endDate);
 
 const etherScanOffset = 1000;
 const blockIntervalSeconds = 14;
 
 export const getTransactions = async (wallets: string[]): Promise<IRawTransaction[]> => {
-    console.log(`Looking for border blocks for dates from: ${config.startDate} to: ${config.endDate}`);
-    const startBlock = await findStartBlock(startMoment);
-    const endBlock = await findEndBlock(endMoment);
+    console.log(`Looking for border blocks for dates range`);
+    const startBlock = await findStartBlock(config.startDate);
+    const endBlock = await findEndBlock(config.endDate);
     console.log(`Blocks between: ${startBlock} - ${endBlock}`);
 
     let allTxs: IRawTransaction[] = [];
@@ -132,7 +126,7 @@ const comparatorTimestamp = (a: IRawTransaction, b: IRawTransaction): number => 
 };
 
 const filterDate = (tx: IRawTransaction): boolean =>
-    Moment.unix(parseInt(tx.timeStamp, 10)).isBetween(startMoment, endMoment, "days", "[]");
+    Moment.unix(parseInt(tx.timeStamp, 10)).isBetween(config.startDate, config.endDate, "days", "[]");
 
 export const parseTransactions = (transactions: IRawTransaction[]): IParsedTransaction[] => {
     const web3 = new Web3();

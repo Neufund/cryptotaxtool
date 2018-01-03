@@ -1,16 +1,12 @@
 import * as Kraken from "kraken-exchange";
 import * as Moment from "moment";
 
-import * as c from "../config.json";
+import { config } from "./config";
 import {IComputedTransaction, TxType} from "./constants";
-import {IConfig} from "./typings/config";
-
-// TODO: this should be done properly
-const config = c as IConfig;
 
 export const findKrakenTxs = async (transactions: IComputedTransaction[]): Promise<IComputedTransaction[]> => {
 
-    const kraken = new Kraken(c.kraken.key, config.kraken.secret);
+    const kraken = new Kraken(config.kraken.key, config.kraken.secret);
     const withdrawalsRaw = (await kraken.ledgers("ETH", "withdrawal")).ledger;
     const withdrawalsParsed = Object.values(withdrawalsRaw).map((elm: any) => ({
         amount: Math.abs(parseFloat(elm.amount)),
