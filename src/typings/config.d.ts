@@ -21,4 +21,10 @@ export interface IConfig {
         key: string,
         secret: string,
     };
+    email: {
+        enabled: boolean,
+        destEmail: string,
+        userName: string,
+        appPassword: string,
+    };
 }

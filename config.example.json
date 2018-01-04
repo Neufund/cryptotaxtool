@@ -28,5 +28,12 @@
     "enabled": false,
     "key": "",
     "secret": ""
+  },
+  "email": {
+    "enabled": false,
+    "destEmail": "",
+    "userName":"",
+    "password":"",
+    "appPassword": ""
   }
 }

@@ -3,6 +3,7 @@ import * as json2csv from "json2csv";
 
 import { computeTransactions } from "./computeTx";
 import { config } from "./config";
+import { sendEmail } from "./email";
 import { getTransactions , parseTransactions } from "./etherscan";
 import { findKrakenTxs } from "./kraken";
 
@@ -18,16 +19,27 @@ const code = async () =>  {
     contracts = contracts.concat(newContracts);
     const txsParsed = parseTransactions(txsRaw);
     let txsComputed = await computeTransactions(txsParsed, contracts);
+
     if (config.kraken.enabled) {
         txsComputed = await findKrakenTxs(txsComputed);
     }
-    writeToFile(txsComputed);
+
+    const filePath = writeToFile(txsComputed);
+
+    if (config.email.enabled) {
+        sendEmail(filePath);
+    }
+
     displayNewContracts(newContracts);
 };
 
-code().catch((err) => console.log(err));
+code().catch((err) => {
+    console.log(err);
+    process.exit(1);
+});
 
 const writeToFile = (transactions: any) => {
+    const path = `./outcome/Transactions_${config.startDate.format("YYMMDD")}-${config.endDate.format("YYMMDD")}.csv`;
     const fields = [
         "date",
         "hash",
@@ -62,8 +74,9 @@ const writeToFile = (transactions: any) => {
         mkdirSync("./outcome");
     }
 
-    writeFileSync("./outcome/transactions.csv", csv);
-    console.log("file saved");
+    writeFileSync(path, csv);
+    console.log(`${path} saved`);
+    return path;
 };
 
 const displayNewContracts = (newContracts: Array<{

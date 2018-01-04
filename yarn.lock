@@ -48,6 +48,12 @@
   version "8.0.58"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.58.tgz#5b3881c0be3a646874803fee3197ea7f1ed6df90"
 
+"@types/nodemailer@^4.3.1":
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/@types/nodemailer/-/nodemailer-4.3.1.tgz#e3985c1b7c7bbbb2a886108b89f1c7ce9a690654"
+  dependencies:
+    "@types/node" "*"
+
 "@types/source-map-support@^0.4.0":
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/@types/source-map-support/-/source-map-support-0.4.0.tgz#a62a1866614af68c888173c001481f242aaf148b"
@@ -552,6 +558,10 @@ node-fetch@^1.7.3:
   dependencies:
     encoding "^0.1.11"
     is-stream "^1.0.1"
+
+nodemailer@^4.4.1:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-4.4.1.tgz#ce480eb3db7b949b3366e301b8f0af1c1248025e"
 
 oauth-sign@~0.8.2:
   version "0.8.2"
