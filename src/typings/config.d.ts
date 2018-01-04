@@ -1,8 +1,10 @@
+import * as Moment from "moment";
+
 import { FiatCurrency } from "../constants";
 
 export interface IConfig {
-    startDate: string;
-    endDate: string;
+    startDate: Moment.Moment;
+    endDate: Moment.Moment;
     ethScanApiKey: string;
     wallets: Array<{
         address: string;
@@ -18,5 +20,11 @@ export interface IConfig {
         enabled: boolean,
         key: string,
         secret: string,
+    };
+    email: {
+        enabled: boolean,
+        destEmail: string,
+        userName: string,
+        appPassword: string,
     };
 }

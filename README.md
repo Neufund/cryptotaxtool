@@ -14,6 +14,9 @@ Categories describe the direction in which eth flows.
 ### Optional Kraken integration
 There is a possibility to integrate with Kraken exchange (you need to enable it through configuration). If you enable it will mark **deposits** from Kraken as local transactions and use Kraken fee instead tx fee.
 
+### Optional e-mail transport
+If you want you can send outcome file using e-mail (for now we are supporting Gmail) - you need to configure it through config.
+
 ## Configuration and running
 
 From the technical point of view, it's Javascript node application running on [node.js](https://nodejs.org/) and we use [yarn package manager](https://yarnpkg.com) to handle dependencies. To run the tool you need both to be installed on your machine. Its easy and both sides provide detailed instruction how to do it.
@@ -29,7 +32,8 @@ Configuration is stored in `config.json` you need to create one by yourself. We 
 - **ethScanApiKey** To use Etherscan API you have to register and generate your unique API key. Go to [the login page](https://etherscan.io/login) and after creating/logging into user panel in [API-KEYs](https://etherscan.io/myapikey) you can generate API key.
 - **wallets** For those addresses script will obtain transactions. You can provide `alias` which will be used instead of the address on outcome list. Second optional option is `"isDev": true`. If you mark address with it `description` column will start with `dev expenses`. We use it for our company to distinguish dev addresses from ops ones.
 - **contracts** You can provide a list of contracts with aliases. Those will be treated as **local** transactions and the alias will be used as **to** field.
-- **kraken** To enable it you need to set *enabled* variable to true and pass **key** and **secret** which you can obtain form Kraken user panel.  
+- **kraken** To enable it you need to set **enabled** variable to true and fill  **key** and **secret** which you can obtain form Kraken user panel.
+- **email** You can enable it in the same way as **Kraken** integration. Just fill recipient address and your credentials. If you are using `2-Step-Verification` you have to enable [App Passwords](https://support.google.com/accounts/answer/185833).   
 
 ### Running
 Just issue `yarn start` command and script will start working and gather all required information. It will crate `./outcome` directory with `trasactions.csv` file.
