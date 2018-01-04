@@ -1,11 +1,31 @@
 {
-    "defaultSeverity": "error",
-    "extends": [
-        "tslint:recommended"
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:latest",
+    "tslint-eslint-rules",
+    "tslint-config-airbnb",
+    "tslint-plugin-prettier",
+    "tslint-config-prettier"
+  ],
+  "jsRules": {},
+  "rules": {
+    "no-console": false,
+    "prettier": [
+      true,
+      {
+        "printWidth": 100,
+        "trailingComma": "es5"
+      }
     ],
-    "jsRules": {},
-    "rules": {
-        "no-console": false
-    },
-    "rulesDirectory": []
+    "object-literal-sort-keys": false,
+    "no-floating-promises": true,
+    "prefer-array-literal": [
+      true,
+      {
+        "allow-type-parameters": true
+      }
+    ],
+    "no-shadowed-variable": false
+  },
+  "rulesDirectory": []
 }
