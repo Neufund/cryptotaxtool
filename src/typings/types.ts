@@ -1,5 +1,5 @@
+import { BigNumber } from "bignumber.js";
 import { Moment } from "moment";
-import {BigNumber} from "bignumber.js";
 
 export enum FiatCurrency {
   EUR = "EUR",
@@ -47,6 +47,14 @@ export interface IConfig {
   };
 }
 
+export interface IPricesTable {
+  [date: string]: {
+    [currency: string]: {
+      [currency: string]: number;
+    };
+  };
+}
+
 export interface IRawTransaction {
   contractAddress: string;
   from: string;
@@ -87,4 +95,3 @@ export interface IComputedTransaction {
   type: TxType;
   desc?: string;
 }
-
