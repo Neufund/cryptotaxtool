@@ -2,7 +2,7 @@ import * as commander from "commander";
 import * as Moment from "moment";
 
 import * as c from "../config.json";
-import { IConfig } from "./typings/config";
+import { IConfig } from "./typings/types";
 
 const command = commander
   .option(
