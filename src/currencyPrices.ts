@@ -9,7 +9,7 @@ export let prices: IPricesTable = {};
 
 export const obtainPrices = async () => {
   // for now just ETH price but later we will call Kraken and.or other sources and merge them together here
-  prices = cryptoCurrencyPrices(config.startDate, CryptoCurrency.ETH, FiatCurrency.EUR);
+  prices = await cryptoCurrencyPrices(config.startDate, CryptoCurrency.ETH, FiatCurrency.EUR);
 };
 
 const cryptoCurrencyPrices = async (
