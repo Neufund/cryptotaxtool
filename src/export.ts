@@ -24,12 +24,14 @@ export const dumpToCSV = (ledger: ILedgerEntry[]): void => {
     "senderCurrency",
     "senderAmount",
     "senderAmountFiat",
+    "senderCurrencyExchangeRate",
     "receiver",
     "receiverCurrency",
     "receiverAmount",
     "feeCurrency",
     "feeAmount",
     "feeFiat",
+    "feeCurrencyExchangeRate",
     "type",
     "notes",
   ];
@@ -40,14 +42,14 @@ export const dumpToCSV = (ledger: ILedgerEntry[]): void => {
     `Sender currency`,
     `Sender amount`,
     `Sender amount in ${config.fiatCurrency}`,
-
+    `Sender currency exchange rate from date in  ${config.fiatCurrency}`,
     `Receiver`,
     `Receiver currency`,
     `Receiver amount`,
-
     `Fee currency`,
     `Fee amount`,
     `Fee amount in  ${config.fiatCurrency}`,
+    `Fee currency exchange rate from date in ${config.fiatCurrency}`,
     `Transaction type`,
     `Notes`,
   ];
@@ -55,7 +57,6 @@ export const dumpToCSV = (ledger: ILedgerEntry[]): void => {
 
   writeFileSync(path, csv);
   console.log(`${path} saved`);
-
 };
 
 export const prepareDataToDisplay = (ledger: ILedgerEntry[]): ILedgerEntryDisplay[] => {
@@ -71,12 +72,14 @@ export const prepareDataToDisplay = (ledger: ILedgerEntry[]): ILedgerEntryDispla
       senderCurrency: entry.senderCurrency.toString(),
       senderAmount: entry.senderAmount.toString(),
       senderAmountFiat: entry.senderAmount.times(senderCurrencyPrice).toFixed(4),
+      senderCurrencyExchangeRate: senderCurrencyPrice.toString(),
       receiver: entry.receiver,
       receiverCurrency: entry.receiverCurrency.toString(),
       receiverAmount: entry.receiverAmount.toString(),
       feeCurrency: entry.feeCurrency.toString(),
       feeAmount: entry.feeAmount.toString(),
       feeFiat: entry.feeAmount.times(feeCurrencyPrice).toFixed(4),
+      feeCurrencyExchangeRate: feeCurrencyPrice.toString(),
       type: entry.type.toString(),
       notes: entry.notes,
     };

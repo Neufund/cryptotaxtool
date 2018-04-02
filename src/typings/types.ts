@@ -79,6 +79,7 @@ export interface ILedgerEntryDisplay {
   senderCurrency: string;
   senderAmount: string;
   senderAmountFiat: string;
+  senderCurrencyExchangeRate: string;
 
   receiver: string;
   receiverCurrency: string;
@@ -87,6 +88,7 @@ export interface ILedgerEntryDisplay {
   feeCurrency: string;
   feeAmount: string;
   feeFiat: string;
+  feeCurrencyExchangeRate: string;
 
   type: string;
   notes?: string;

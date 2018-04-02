@@ -57,7 +57,6 @@ export const getTransactions = async (wallets: string[]): Promise<IRawEthScanTra
   const filteredByDate = removedDups.filter(filterDate);
   filteredByDate.sort(comparatorTimestamp);
 
-  console.log(filteredByDate);
   return Promise.resolve(filteredByDate);
 };
 
