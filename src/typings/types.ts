@@ -36,11 +36,6 @@ export interface IConfig {
     contracts: IEthAcconut[];
   };
   fiatCurrency: FiatCurrency;
-  kraken: {
-    enabled: boolean;
-    key: string;
-    secret: string;
-  };
   email: {
     enabled: boolean;
     destEmail: string;
