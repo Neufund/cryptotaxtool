@@ -20,7 +20,7 @@ export enum TxType {
   EXPENSE = "EXPENSE",
 }
 
-export interface IEthAcconut {
+export interface IEthAccount {
   address: string;
   alias: string;
   isDev?: boolean;
@@ -32,8 +32,8 @@ export interface IConfig {
   endDate: Moment;
   ethScanApiKey: string;
   ETH: {
-    wallets: IEthAcconut[];
-    contracts: IEthAcconut[];
+    wallets: IEthAccount[];
+    contracts: IEthAccount[];
   };
   fiatCurrency: FiatCurrency;
   email: {

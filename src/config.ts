@@ -2,7 +2,7 @@ import * as commander from "commander";
 import * as Moment from "moment";
 
 import * as c from "../config.json";
-import { IConfig, IEthAcconut } from "./typings/types";
+import { IConfig, IEthAccount } from "./typings/types";
 
 const command = commander
   .option(
@@ -41,7 +41,7 @@ for (const wallet of config.ETH.wallets) {
   }
 }
 
-export const getEthAlias = (ethAddress: string): IEthAcconut => {
+export const getEthAlias = (ethAddress: string): IEthAccount => {
   const wallet = config.ETH.wallets.find(elm => {
     return elm.address.toLowerCase() === ethAddress.toLowerCase();
   });
