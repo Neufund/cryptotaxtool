@@ -1,3 +1,4 @@
+/*
 import * as Kraken from "kraken-exchange";
 import * as Moment from "moment";
 
@@ -51,3 +52,4 @@ export const findKrakenTxs = async (
     }
   });
 };
+*/

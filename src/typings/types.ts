@@ -20,19 +20,21 @@ export enum TxType {
   EXPENSE = "EXPENSE",
 }
 
+export interface IEthAcconut {
+  address: string;
+  alias: string;
+  isDev?: boolean;
+  isContract?: boolean;
+}
+
 export interface IConfig {
   startDate: Moment;
   endDate: Moment;
   ethScanApiKey: string;
-  wallets: Array<{
-    address: string;
-    alias: string;
-    isDev?: boolean;
-  }>;
-  contracts: Array<{
-    address: string;
-    alias: string;
-  }>;
+  ETH: {
+    wallets: IEthAcconut[];
+    contracts: IEthAcconut[];
+  };
   fiatCurrency: FiatCurrency;
   kraken: {
     enabled: boolean;
@@ -55,43 +57,42 @@ export interface IPricesTable {
   };
 }
 
-export interface IRawTransaction {
-  contractAddress: string;
-  from: string;
-  gasPrice: string;
-  gasUsed: string;
-  hash: string;
-  timeStamp: string;
-  to: string;
-  txreceipt_status: string;
-  value: string;
-}
-
-export interface IParsedTransaction {
-  contractCreation: boolean;
+export interface ILedgerEntry {
   date: Moment;
-  from: string;
-  gasEth: BigNumber;
-  gasPrice: BigNumber;
-  gasUsed: BigNumber;
-  hash: string;
-  to: string;
-  txFailed: boolean;
-  value: BigNumber;
+  id: string;
+
+  sender: string;
+  senderCurrency: FiatCurrency | CryptoCurrency;
+  senderAmount: BigNumber;
+
+  receiver: string;
+  receiverCurrency: FiatCurrency | CryptoCurrency;
+  receiverAmount: BigNumber;
+
+  feeCurrency: FiatCurrency | CryptoCurrency;
+  feeAmount: BigNumber;
+
+  type: TxType;
+  notes?: string;
 }
 
-export interface IComputedTransaction {
+export interface ILedgerEntryDisplay {
   date: string;
-  from: string;
-  hash: string;
-  to: string;
-  txCostETH: string;
-  txCostFiat: string;
-  txValueETH: string;
-  txValueFiat: string;
-  txTotalETH: string;
-  txTotalFiat: string;
-  ethPrice: string;
-  type: TxType;
-  desc?: string;
+  id: string;
+
+  sender: string;
+  senderCurrency: string;
+  senderAmount: string;
+  senderAmountFiat: string;
+
+  receiver: string;
+  receiverCurrency: string;
+  receiverAmount: string;
+
+  feeCurrency: string;
+  feeAmount: string;
+  feeFiat: string;
+
+  type: string;
+  notes?: string;
 }

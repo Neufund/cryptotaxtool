@@ -2,7 +2,7 @@ import * as commander from "commander";
 import * as Moment from "moment";
 
 import * as c from "../config.json";
-import { IConfig } from "./typings/types";
+import { IConfig, IEthAcconut } from "./typings/types";
 
 const command = commander
   .option(
@@ -30,3 +30,33 @@ if (command.lastWeek) {
   config.endDate = Moment(c.endDate).endOf("date");
   console.log(`Using date range from config.json from: ${config.startDate} to: ${config.endDate}`);
 }
+
+for (const contract of config.ETH.contracts) {
+  contract.isContract = true;
+}
+
+for (const wallet of config.ETH.wallets) {
+  if (wallet.isDev === undefined) {
+    wallet.isDev = false;
+  }
+}
+
+export const getEthAlias = (ethAddress: string): IEthAcconut => {
+  const wallet = config.ETH.wallets.find(elm => {
+    return elm.address.toLowerCase() === ethAddress.toLowerCase();
+  });
+
+  if (wallet !== undefined) {
+    return wallet;
+  }
+
+  const contract = config.ETH.contracts.find(elm => {
+    return elm.address.toLowerCase() === ethAddress.toLowerCase();
+  });
+
+  if (contract !== undefined) {
+    return contract;
+  }
+
+  return undefined;
+};
