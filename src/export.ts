@@ -4,12 +4,12 @@ import * as json2csv from "json2csv";
 import { config } from "./config";
 import { dateFormat } from "./constants";
 import { prices } from "./currencyPrices";
-import { CryptoCurrency, ILedgerEntry, ILedgerEntryDisplay } from "./typings/types";
+import { ILedgerEntry, ILedgerEntryDisplay } from "./typings/types";
 
 export const dumpToCSV = (ledger: ILedgerEntry[]): void => {
-  const path = `./outcome/test_Transactions_${config.startDate.format("YYMMDD")}-${config.endDate.format(
+  const path = `./outcome/test_Transactions_${config.startDate.format(
     "YYMMDD"
-  )}.csv`;
+  )}-${config.endDate.format("YYMMDD")}.csv`;
 
   if (!existsSync("./outcome")) {
     mkdirSync("./outcome");

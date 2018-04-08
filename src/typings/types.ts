@@ -7,6 +7,7 @@ export enum FiatCurrency {
 }
 
 export enum CryptoCurrency {
+  BCH = "BCH",
   BTC = "BTC",
   ETC = "ETC",
   ETH = "ETH",
