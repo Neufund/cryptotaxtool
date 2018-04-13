@@ -1,13 +1,17 @@
-import { coinTrackingImport } from "./cointracking/worker";
+import { coinTrackingImport, combineCoinTrackingInfo } from "./cointracking/worker";
 import { obtainPrices } from "./currencyPrices";
 import { gatherETH } from "./eth/worker";
 import { dumpToCSV } from "./export";
 
 const code = async () => {
+  const eth = await gatherETH();
+  const coinTrackingTransactions = coinTrackingImport();
+
+  const ledger = combineCoinTrackingInfo(eth, coinTrackingTransactions);
+
   await obtainPrices();
-  const ledger = await gatherETH();
+
   dumpToCSV(ledger);
-  coinTrackingImport();
 };
 
 code().catch(err => {

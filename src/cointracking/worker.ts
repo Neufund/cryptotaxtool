@@ -20,56 +20,153 @@ export const coinTrackingImport = (): ILedgerEntry[] => {
 const parseData = (transactions: any[]): ILedgerEntry[] => {
   const ret: ILedgerEntry[] = [];
   for (const transaction of transactions.slice(1)) {
+    const date = Moment(transaction[9], COIN_TRACKING_DATE_FORMAT);
+    const id = transaction[8];
     let type;
-    let sender;
-    let receiver;
-    let senderCurrency;
-    let senderAmount;
-    let receiverCurrency;
-    let receiverAmount;
+    let sender = transaction[7];
+    let receiver = transaction[7];
+
+    let feeCurrency = parseCurrency(transaction[6]);
+    const feeAmount = transaction[5] !== "-" ? new BigNumber(transaction[5]) : new BigNumber(0);
+
+    let senderCurrency = parseCurrency(transaction[4]);
+    let senderAmount = transaction[3] !== "-" ? new BigNumber(transaction[3]) : new BigNumber(0);
+
+    let receiverCurrency = parseCurrency(transaction[2]);
+    let receiverAmount = transaction[1] !== "-" ? new BigNumber(transaction[1]) : new BigNumber(0);
 
     if (transaction[0] === "Deposit") {
       type = TxType.DEPOSIT;
       sender = "Unknown";
-      senderCurrency = parseCurrency(transaction[2]);
-      senderAmount = new BigNumber(transaction[1]);
-      receiver = transaction[7];
-      receiverCurrency = senderCurrency;
-      receiverAmount = senderAmount;
-    } else if (transaction[0] === "Withdrawal") {
-      type = TxType.EXPENSE;
-      sender = transaction[7];
-      receiverCurrency = parseCurrency(transaction[4]);
-      receiverAmount = new BigNumber(transaction[3]);
-      receiver = "Unknown";
+
       senderCurrency = receiverCurrency;
       senderAmount = receiverAmount;
+
+      if (feeCurrency === undefined) {
+        feeCurrency = receiverCurrency;
+      }
+    } else if (transaction[0] === "Withdrawal") {
+      type = TxType.EXPENSE;
+      receiver = "Unknown";
+      senderAmount = senderAmount.minus(feeAmount);
+      receiverCurrency = senderCurrency;
+      receiverAmount = senderAmount;
     } else if (transaction[0] === "Trade") {
       type = TxType.LOCAL;
-      sender = transaction[7];
-      senderCurrency = parseCurrency(transaction[2]);
-      senderAmount = new BigNumber(transaction[1]);
-      receiver = transaction[7];
-      receiverCurrency = parseCurrency(transaction[4]);
-      receiverAmount = new BigNumber(transaction[3]);
     } else {
       throw new Error("Unknown transaction type in cointracking info import");
     }
 
-    ret.push({
-      date: Moment(transaction[9], COIN_TRACKING_DATE_FORMAT),
-      id: transaction[8],
+    const ledgerEntry: ILedgerEntry = {
+      date,
+      id,
       sender,
       senderCurrency,
       senderAmount,
       receiver,
       receiverCurrency,
       receiverAmount,
-      feeCurrency: parseCurrency(transaction[6]),
-      feeAmount: transaction[5] !== "-" ? new BigNumber(transaction[5]) : new BigNumber(0),
+      feeCurrency,
+      feeAmount,
       type,
-    });
+    };
+
+    if (type === TxType.LOCAL) {
+      ret.push({
+        ...ledgerEntry,
+        senderAmount: new BigNumber(0),
+        receiverAmount: new BigNumber(0),
+        type: TxType.EXPENSE,
+      });
+      ret.push({
+        ...ledgerEntry,
+        feeAmount: new BigNumber(0),
+      });
+    } else if (type === TxType.DEPOSIT) {
+      if (!ledgerEntry.feeAmount.isZero()) {
+        ret.push({
+          ...ledgerEntry,
+          senderAmount: new BigNumber(0),
+          receiverAmount: new BigNumber(0),
+          type: TxType.EXPENSE,
+        });
+      }
+      ret.push({
+        ...ledgerEntry,
+        feeAmount: new BigNumber(0),
+      });
+    } else {
+      ret.push(ledgerEntry);
+    }
   }
 
   return ret;
+};
+
+export const combineCoinTrackingInfo = (
+  ledgerData: ILedgerEntry[],
+  coinTrackingData: ILedgerEntry[]
+): ILedgerEntry[] => {
+  const ret = ledgerData.concat(
+    coinTrackingData.filter(ledgerEntry => ledgerEntry.type === TxType.LOCAL)
+  );
+
+  for (const coinTrackingEntry of coinTrackingData.filter(
+    ledgerEntry => ledgerEntry.type !== TxType.LOCAL
+  )) {
+    const matchedTxs = ret.filter(ledgerEntry => {
+      if (
+        ledgerEntry.senderAmount.eq(coinTrackingEntry.senderAmount) &&
+        ledgerEntry.senderCurrency === coinTrackingEntry.senderCurrency &&
+        ((ledgerEntry.type === TxType.EXPENSE && coinTrackingEntry.type === TxType.DEPOSIT) ||
+          (ledgerEntry.type === TxType.DEPOSIT && coinTrackingEntry.type === TxType.EXPENSE)) &&
+        ledgerEntry.date.diff(coinTrackingEntry.date, "days", true) <= 2
+      ) {
+        return true;
+      }
+    });
+
+    if (matchedTxs.length > 1) {
+      console.log(coinTrackingEntry);
+      console.log(matchedTxs);
+      throw new Error(
+        "Cointracking import error. During tx matching there is unambiguous transaction"
+      );
+    } else if (matchedTxs.length === 1) {
+      const matchedTx = matchedTxs[0];
+
+      if (matchedTx.type === TxType.DEPOSIT) {
+        matchedTx.sender = coinTrackingEntry.sender;
+      } else {
+        matchedTx.receiver = coinTrackingEntry.sender;
+      }
+
+      ret.push({
+        ...matchedTx,
+        type: TxType.EXPENSE,
+        senderAmount: new BigNumber(0),
+        receiverAmount: new BigNumber(0),
+        feeAmount:
+          matchedTx.type === TxType.DEPOSIT ? coinTrackingEntry.feeAmount : matchedTx.feeAmount,
+        feeCurrency: coinTrackingEntry.feeCurrency,
+      });
+
+      matchedTx.type = TxType.LOCAL;
+      matchedTx.feeAmount = new BigNumber(0);
+    } else {
+      ret.push(coinTrackingEntry);
+    }
+  }
+
+  ret.sort(ledgerEntryComparator);
+
+  return ret;
+};
+
+const ledgerEntryComparator = (a: ILedgerEntry, b: ILedgerEntry): number => {
+  const dateDiff = a.date.diff(b.date);
+  if (dateDiff !== 0) {
+    return dateDiff;
+  }
+  return a.id.localeCompare(b.id);
 };
