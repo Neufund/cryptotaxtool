@@ -13,6 +13,7 @@ export enum CryptoCurrency {
   ETH = "ETH",
   REP = "REP",
   XMR = "XMR",
+  NEU = "NEU",
 }
 
 export enum TxType {

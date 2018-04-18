@@ -5,6 +5,7 @@ import nodeFetch from "node-fetch";
 import { config } from "../config";
 import { dateFormat } from "../constants";
 import { CryptoCurrency, FiatCurrency, IPricesTable } from "../typings/types";
+import { addNeuPrices } from "./coinmarketcup";
 
 export let prices: IPricesTable = {};
 
@@ -66,6 +67,8 @@ export const obtainPrices = async () => {
       },
     },
   });
+
+  prices = merge(prices, await addNeuPrices(prices));
 };
 
 const cryptoCurrencyPrices = async (

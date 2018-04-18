@@ -899,6 +899,10 @@ web3@0.19.0:
     xhr2 "*"
     xmlhttprequest "*"
 
+weighted-mean@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/weighted-mean/-/weighted-mean-1.0.2.tgz#a3e2ac365f73c23b7d9a27686a0097794b35a550"
+
 wrappy@1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
