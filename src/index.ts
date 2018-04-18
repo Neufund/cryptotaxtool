@@ -1,5 +1,5 @@
 import { coinTrackingImport, combineCoinTrackingInfo } from "./cointracking/worker";
-import { obtainPrices } from "./currencyPrices";
+import { obtainPrices } from "./currencyPrices/currencyPrices";
 import { gatherETH } from "./eth/worker";
 import { dumpToCSV } from "./export";
 

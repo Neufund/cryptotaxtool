@@ -2,9 +2,9 @@ import { merge } from "lodash";
 import * as Moment from "moment";
 import nodeFetch from "node-fetch";
 
-import { config } from "./config";
-import { dateFormat } from "./constants";
-import { CryptoCurrency, FiatCurrency, IPricesTable } from "./typings/types";
+import { config } from "../config";
+import { dateFormat } from "../constants";
+import { CryptoCurrency, FiatCurrency, IPricesTable } from "../typings/types";
 
 export let prices: IPricesTable = {};
 

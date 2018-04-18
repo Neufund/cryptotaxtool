@@ -3,7 +3,7 @@ import * as json2csv from "json2csv";
 
 import { config } from "./config";
 import { dateFormat } from "./constants";
-import { prices } from "./currencyPrices";
+import { prices } from "./currencyPrices/currencyPrices";
 import { ILedgerEntry, ILedgerEntryDisplay } from "./typings/types";
 
 export const dumpToCSV = (ledger: ILedgerEntry[]): void => {
