@@ -40,6 +40,13 @@ export const addNeuPrices = async (prices: IPricesTable): Promise<IPricesTable> 
       },
     };
   }
+
+  // we need data since 2017-12-12 but Coinmarketcap has it since 2017-12-29 so we just copy first entry
+  const startMoment = Moment("2017-12-12");
+  for (let i = 0; i < 16; i = i + 1) {
+    retPrices[startMoment.add(1, "days").format(dateFormat)] = retPrices["2017-12-29"];
+  }
+
   return retPrices;
 };
 

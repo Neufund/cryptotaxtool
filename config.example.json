@@ -3,6 +3,7 @@
   "endDate": "YYYY-MM-DD",
   "ethScanApiKey": "your EtherScan api key",
   "fiatCurrency": "EUR",
+  "ethereumNodeUrl": "http://example.org:8545",
   "ETH": {
     "wallets": [
       {
@@ -25,6 +26,10 @@
         "alias": "alias2"
       }
     ]
+  },
+  "NEU": {
+    "tokenMapperUrl": "http://example.com",
+    "contractAddress": "0xa823e6722006afe99e91c30ff5295052fe6b8e32"
   },
   "email": {
     "enabled": false,

@@ -33,9 +33,14 @@ export interface IConfig {
   startDate: Moment;
   endDate: Moment;
   ethScanApiKey: string;
+  ethereumNodeUrl: string;
   ETH: {
     wallets: IEthAccount[];
     contracts: IEthAccount[];
+  };
+  NEU: {
+    tokenMapperUrl: string;
+    contractAddress: string;
   };
   fiatCurrency: FiatCurrency;
   email: {
