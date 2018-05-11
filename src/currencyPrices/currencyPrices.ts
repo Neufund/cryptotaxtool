@@ -5,7 +5,7 @@ import nodeFetch from "node-fetch";
 import { config } from "../config";
 import { dateFormat } from "../constants";
 import { CryptoCurrency, FiatCurrency, IPricesTable } from "../typings/types";
-import { addNeuPrices } from "./coinmarketcup";
+import { addNeuPrices } from "./coinmarketcap";
 
 export let prices: IPricesTable = {};
 
