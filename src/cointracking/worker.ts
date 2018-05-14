@@ -8,6 +8,20 @@ import { parseCurrency } from "../utils";
 
 const COIN_TRACKING_DATE_FORMAT = "DD.MM.YYYY HH:mm";
 
+/**
+ * Columns to export from cointracking info:
+ *  0. (1)  Type
+ *  1. (2)  Buy
+ *  2. (3)  Cur.
+ *  3. (6)  Sell
+ *  4. (7)  Cur.
+ *  5. (10) Fee.
+ *  6. (11) Cur
+ *  7. (14) Exchange
+ *  8. (18) Trade ID
+ *  9. (20) Trade Date
+ */
+
 export const coinTrackingImport = (): ILedgerEntry[] => {
   // TODO: handle better choosing file to import
   const data = readFileSync("./import/list.csv", "utf-8").replace(/^\uFEFF/, "");
