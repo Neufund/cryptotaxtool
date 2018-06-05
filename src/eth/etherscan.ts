@@ -14,10 +14,8 @@ const ETHERSCAN_API_LIMIT = 4.5; // req per s doc says its 5 so we set a bit low
 
 export const getTransactions = async (wallets: string[]): Promise<IRawEthScanTransaction[]> => {
   console.log(`Looking for border blocks for dates range`);
-  // const startBlock = await findStartBlock(config.startDate);
-  // const endBlock = await findEndBlock(config.endDate);
-  const startBlock = 2912029;
-  const endBlock = 4838367;
+  const startBlock = await findStartBlock(config.startDate);
+  const endBlock = await findEndBlock(config.endDate);
   console.log(`Blocks between: ${startBlock} - ${endBlock}`);
 
   let allTxs: IRawEthScanTransaction[] = [];
