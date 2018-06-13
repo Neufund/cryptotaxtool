@@ -3,9 +3,9 @@ import * as Moment from "moment";
 import nodeFetch from "node-fetch";
 import * as weightedMean from "weighted-mean";
 
+import { config } from "../config";
 import { dateFormat } from "../constants";
 import { CryptoCurrency, FiatCurrency, IPricesTable } from "../typings/types";
-import { prices } from "./currencyPrices";
 
 const DATA_ENDPOINT = "https://graphs2.coinmarketcap.com/currencies/neumark/";
 
@@ -19,7 +19,7 @@ export const addNeuPrices = async (prices: IPricesTable): Promise<IPricesTable> 
   const volumesBrokenIntoDays = rawData.volume_usd.reduce(dateReducer, {});
 
   const rawPrices: any = {};
-  for (const date of Object.keys(pricesBrokenIntoDays)) {
+  for (const date of Object.keys(pricesBrokenIntoDays).filter(dateFilter)) {
     rawPrices[date] = weightedMean(zip(pricesBrokenIntoDays[date], volumesBrokenIntoDays[date]));
   }
 
@@ -41,10 +41,12 @@ export const addNeuPrices = async (prices: IPricesTable): Promise<IPricesTable> 
     };
   }
 
-  // we need data since 2017-12-12 but Coinmarketcap has it since 2017-12-29 so we just copy first entry
-  const startMoment = Moment("2017-12-12");
-  for (let i = 0; i < 16; i = i + 1) {
-    retPrices[startMoment.add(1, "days").format(dateFormat)] = retPrices["2017-12-29"];
+  // We need data since 2017-12-12 but Coinmarketcap has it since 2017-12-29 so we just copy first entry
+  if (config.startDate.isBefore("2017-12-29")) {
+    const startMoment = Moment("2017-12-12");
+    for (let i = 0; i < 16; i = i + 1) {
+      retPrices[startMoment.add(1, "days").format(dateFormat)] = retPrices["2017-12-29"];
+    }
   }
 
   return retPrices;
@@ -60,3 +62,6 @@ const dateReducer = (accumulator: any, currentValue: any): any => {
   accumulator[date].push(value);
   return accumulator;
 };
+
+const dateFilter = (date: string): boolean =>
+  Moment(date).isBetween(config.startDate, config.endDate);

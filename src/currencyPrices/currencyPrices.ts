@@ -8,8 +8,6 @@ import { cryptoCurrencyPrices } from "./kraken";
 export let prices: IPricesTable = {};
 
 export const obtainPrices = async () => {
-  prices = {};
-
   prices = merge(
     prices,
     await cryptoCurrencyPrices(config.startDate, CryptoCurrency.BCH, FiatCurrency.EUR)
