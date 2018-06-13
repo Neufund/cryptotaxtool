@@ -1,10 +1,10 @@
 {
-  "name": "eth_accounting",
+  "name": "cryptotaxtool",
   "version": "0.0.1",
   "description": "Scripts to get transactions information for accounting",
   "main": "index.js",
-  "repository": "git@github.com:Neufund/eth_accounting.git",
-  "author": "Tomek Banach <tomek@banciur.org>",
+  "repository": "git@github.com:Neufund/cryptotaxtool.git",
+  "author": "Tomek Banach <tomek.banach@neufund.org>",
   "license": "MIT",
   "devDependencies": {
     "@types/bluebird": "^3.5.18",
