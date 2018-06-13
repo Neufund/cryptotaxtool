@@ -40,14 +40,18 @@ const parseData = (transactions: any[]): ILedgerEntry[] => {
     let sender = transaction[7];
     let receiver = transaction[7];
 
-    let feeCurrency = parseCurrency(transaction[6]);
-    const feeAmount = transaction[5] !== "-" ? new BigNumber(transaction[5]) : new BigNumber(0);
-
     let senderCurrency = parseCurrency(transaction[4]);
     let senderAmount = transaction[3] !== "-" ? new BigNumber(transaction[3]) : new BigNumber(0);
 
     let receiverCurrency = parseCurrency(transaction[2]);
     let receiverAmount = transaction[1] !== "-" ? new BigNumber(transaction[1]) : new BigNumber(0);
+
+    let feeCurrency = parseCurrency(transaction[6]);
+    const feeAmount = transaction[5] !== "-" ? new BigNumber(transaction[5]) : new BigNumber(0);
+
+    if (feeCurrency === undefined) {
+      feeCurrency = receiverCurrency;
+    }
 
     if (transaction[0] === "Deposit") {
       type = TxType.DEPOSIT;
@@ -55,10 +59,6 @@ const parseData = (transactions: any[]): ILedgerEntry[] => {
 
       senderCurrency = receiverCurrency;
       senderAmount = receiverAmount;
-
-      if (feeCurrency === undefined) {
-        feeCurrency = receiverCurrency;
-      }
     } else if (transaction[0] === "Withdrawal") {
       type = TxType.EXPENSE;
       receiver = "Unknown";
@@ -86,12 +86,14 @@ const parseData = (transactions: any[]): ILedgerEntry[] => {
     };
 
     if (type === TxType.LOCAL) {
-      ret.push({
-        ...ledgerEntry,
-        senderAmount: new BigNumber(0),
-        receiverAmount: new BigNumber(0),
-        type: TxType.EXPENSE,
-      });
+      if (!feeAmount.isZero()) {
+        ret.push({
+          ...ledgerEntry,
+          senderAmount: new BigNumber(0),
+          receiverAmount: new BigNumber(0),
+          type: TxType.EXPENSE,
+        });
+      }
       ret.push({
         ...ledgerEntry,
         feeAmount: new BigNumber(0),
