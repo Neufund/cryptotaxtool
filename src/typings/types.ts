@@ -22,6 +22,11 @@ export enum TxType {
   EXPENSE = "EXPENSE",
 }
 
+export enum ExpenseType {
+  FEE = "FEE",
+  PAYMENT = "PAYMENT",
+}
+
 export interface IEthAccount {
   address: string;
   alias: string;
@@ -71,10 +76,8 @@ export interface ILedgerEntry {
   receiverCurrency: FiatCurrency | CryptoCurrency;
   receiverAmount: BigNumber;
 
-  feeCurrency: FiatCurrency | CryptoCurrency;
-  feeAmount: BigNumber;
-
   type: TxType;
+  expenseType: null | ExpenseType;
   notes?: string;
 }
 
@@ -86,17 +89,13 @@ export interface ILedgerEntryDisplay {
   senderCurrency: string;
   senderAmount: string;
   senderAmountFiat: string;
-  senderCurrencyExchangeRate: string;
 
   receiver: string;
   receiverCurrency: string;
   receiverAmount: string;
-
-  feeCurrency: string;
-  feeAmount: string;
-  feeFiat: string;
-  feeCurrencyExchangeRate: string;
+  receiverAmountFiat: string;
 
   type: string;
+  expenseType: string;
   notes?: string;
 }

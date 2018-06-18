@@ -24,15 +24,12 @@ export const dumpToCSV = (ledger: ILedgerEntry[]): void => {
     "senderCurrency",
     "senderAmount",
     "senderAmountFiat",
-    "senderCurrencyExchangeRate",
     "receiver",
     "receiverCurrency",
     "receiverAmount",
-    "feeCurrency",
-    "feeAmount",
-    "feeFiat",
-    "feeCurrencyExchangeRate",
+    "receiverAmountFiat",
     "type",
+    "expenseType",
     "notes",
   ];
   const fieldNames = [
@@ -42,15 +39,12 @@ export const dumpToCSV = (ledger: ILedgerEntry[]): void => {
     `Sender currency`,
     `Sender amount`,
     `Sender amount in ${config.fiatCurrency}`,
-    `Sender currency exchange rate from date in  ${config.fiatCurrency}`,
     `Receiver`,
     `Receiver currency`,
     `Receiver amount`,
-    `Fee currency`,
-    `Fee amount`,
-    `Fee amount in  ${config.fiatCurrency}`,
-    `Fee currency exchange rate from date in ${config.fiatCurrency}`,
+    `Receiver amount in ${config.fiatCurrency}`,
     `Transaction type`,
+    `Expense type`,
     `Notes`,
   ];
   const csv = json2csv({ fields, fieldNames, data: formattedEntries });
@@ -63,7 +57,7 @@ export const prepareDataToDisplay = (ledger: ILedgerEntry[]): ILedgerEntryDispla
   return ledger.map(entry => {
     const date = entry.date.format(dateFormat);
     const senderCurrencyPrice = prices[date][entry.senderCurrency][config.fiatCurrency];
-    const feeCurrencyPrice = prices[date][entry.feeCurrency][config.fiatCurrency];
+    const receiverCurrencyPrice = prices[date][entry.receiverCurrency][config.fiatCurrency];
 
     return {
       date,
@@ -72,15 +66,12 @@ export const prepareDataToDisplay = (ledger: ILedgerEntry[]): ILedgerEntryDispla
       senderCurrency: entry.senderCurrency.toString(),
       senderAmount: entry.senderAmount.toString(),
       senderAmountFiat: entry.senderAmount.times(senderCurrencyPrice.toString(10)).toFixed(4),
-      senderCurrencyExchangeRate: senderCurrencyPrice.toString(),
       receiver: entry.receiver,
       receiverCurrency: entry.receiverCurrency.toString(),
       receiverAmount: entry.receiverAmount.toString(),
-      feeCurrency: entry.feeCurrency.toString(),
-      feeAmount: entry.feeAmount.toString(),
-      feeFiat: entry.feeAmount.times(feeCurrencyPrice.toString(10)).toFixed(4),
-      feeCurrencyExchangeRate: feeCurrencyPrice.toString(),
+      receiverAmountFiat: entry.receiverAmount.times(receiverCurrencyPrice.toString(10)).toFixed(4),
       type: entry.type.toString(),
+      expenseType: entry.expenseType === null ? "" : entry.expenseType.toString(),
       notes: entry.notes,
     };
   });

@@ -1,7 +1,7 @@
 import { BigNumber } from "bignumber.js";
 
 import { getEthAlias } from "../config";
-import { CryptoCurrency, ILedgerEntry, TxType } from "../typings/types";
+import { CryptoCurrency, ExpenseType, ILedgerEntry, TxType } from "../typings/types";
 import { IParsedEthScanTransaction } from "./types";
 
 export const computeTransactions = (transactions: IParsedEthScanTransaction[]): ILedgerEntry[] => {
@@ -70,27 +70,25 @@ export const computeTransactions = (transactions: IParsedEthScanTransaction[]): 
       receiverCurrency: CryptoCurrency.ETH,
       receiverAmount: txValueETH,
 
-      feeCurrency: CryptoCurrency.ETH,
-      feeAmount: txCostETH,
-
       type: txType,
+      expenseType: txType === TxType.EXPENSE ? ExpenseType.PAYMENT : null,
       notes,
     };
 
-    // we need to handle TxType.LOCAL specially. We have to split into two entries txCost is EXPENSE and txValue is LOCAL
-    if (txType === TxType.LOCAL) {
+    if (txType !== TxType.DEPOSIT) {
       if (!txValueETH.isZero()) {
         txs.push({
           ...ledgerEntry,
-          feeAmount: new BigNumber(0),
         });
       }
 
       txs.push({
         ...ledgerEntry,
-        senderAmount: new BigNumber(0),
-        receiverAmount: new BigNumber(0),
+        senderAmount: txCostETH,
+        receiverAmount: txCostETH,
+        receiver: "ETH network",
         type: TxType.EXPENSE,
+        expenseType: ExpenseType.FEE,
       });
     } else {
       txs.push(ledgerEntry);
