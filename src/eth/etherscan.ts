@@ -5,19 +5,20 @@ import * as Moment from "moment";
 import nodeFetch from "node-fetch";
 import * as Web3 from "web3";
 
-import { config } from "./config";
-import { IParsedTransaction, IRawTransaction } from "./constants";
+import { config } from "../config";
+import { IParsedEthScanTransaction, IRawEthScanTransaction } from "./types";
 
 const etherScanOffset = 1000;
 const blockIntervalSeconds = 14;
+const ETHERSCAN_API_LIMIT = 4.5; // req per s doc says its 5 so we set a bit lower limit
 
-export const getTransactions = async (wallets: string[]): Promise<IRawTransaction[]> => {
+export const getTransactions = async (wallets: string[]): Promise<IRawEthScanTransaction[]> => {
   console.log(`Looking for border blocks for dates range`);
   const startBlock = await findStartBlock(config.startDate);
   const endBlock = await findEndBlock(config.endDate);
   console.log(`Blocks between: ${startBlock} - ${endBlock}`);
 
-  let allTxs: IRawTransaction[] = [];
+  let allTxs: IRawEthScanTransaction[] = [];
   for (const wallet of wallets) {
     console.log(`getting transactions for: ${wallet}`);
     let page = 0;
@@ -30,7 +31,7 @@ export const getTransactions = async (wallets: string[]): Promise<IRawTransactio
         return res.json();
       });
       allTxs = allTxs.concat(
-        txs.result.map((tx: any): IRawTransaction => {
+        txs.result.map((tx: any): IRawEthScanTransaction => {
           return {
             contractAddress: tx.contractAddress,
             from: tx.from,
@@ -47,7 +48,7 @@ export const getTransactions = async (wallets: string[]): Promise<IRawTransactio
       if (txs.result.length < etherScanOffset) {
         break;
       }
-      await delay(300);
+      await delay(1000 / ETHERSCAN_API_LIMIT);
     }
   }
   const removedDups = uniqBy(allTxs, "hash");
@@ -61,7 +62,7 @@ const findStartBlock = async (date: Moment.Moment): Promise<number> => {
   let blockNumber = await getNewestBlockNumber();
   let blockDate = await getBlockDateByNumber(blockNumber);
 
-  while (blockDate.isSameOrAfter(date) || Math.abs(blockDate.diff(date, "days", true)) > 1) {
+  while (blockDate.isAfter(date) || Math.abs(blockDate.diff(date, "hour", true)) > 2) {
     const blockDiff = blockDate.diff(date, "seconds") / blockIntervalSeconds;
     blockNumber = Math.floor(blockNumber - blockDiff);
     blockDate = await getBlockDateByNumber(blockNumber);
@@ -74,18 +75,13 @@ const findEndBlock = async (date: Moment.Moment): Promise<number> => {
   let blockNumber = await getNewestBlockNumber();
   let blockDate = await getBlockDateByNumber(blockNumber);
 
-  const compareDate = date.add(1, "days");
-
   // if we are asking for data from future or today just return latest block number
-  if (compareDate.isAfter(blockDate)) {
+  if (date.isAfter(blockDate)) {
     return Promise.resolve(blockNumber);
   }
 
-  while (
-    blockDate.isSameOrBefore(compareDate) ||
-    Math.abs(blockDate.diff(compareDate, "days", true)) > 1
-  ) {
-    const blockDiff = blockDate.diff(compareDate, "seconds") / blockIntervalSeconds;
+  while (blockDate.isBefore(date) || Math.abs(blockDate.diff(date, "hour", true)) > 2) {
+    const blockDiff = blockDate.diff(date, "seconds") / blockIntervalSeconds;
     blockNumber = Math.ceil(blockNumber - blockDiff);
     blockDate = await getBlockDateByNumber(blockNumber);
   }
@@ -125,18 +121,20 @@ const getEtherScanApiTxURL = (
 &apikey=${config.ethScanApiKey}`;
 };
 
-const comparatorTimestamp = (a: IRawTransaction, b: IRawTransaction): number => {
+const comparatorTimestamp = (a: IRawEthScanTransaction, b: IRawEthScanTransaction): number => {
   const timeStampA = parseInt(a.timeStamp, 10);
   const timeStampB = parseInt(b.timeStamp, 10);
   return timeStampA - timeStampB;
 };
 
-const filterDate = (tx: IRawTransaction): boolean =>
+const filterDate = (tx: IRawEthScanTransaction): boolean =>
   Moment.unix(parseInt(tx.timeStamp, 10)).isBetween(config.startDate, config.endDate, "days", "[]");
 
-export const parseTransactions = (transactions: IRawTransaction[]): IParsedTransaction[] => {
+export const parseTransactions = (
+  transactions: IRawEthScanTransaction[]
+): IParsedEthScanTransaction[] => {
   const web3 = new Web3();
-  const ret: IParsedTransaction[] = [];
+  const ret: IParsedEthScanTransaction[] = [];
   for (const tx of transactions) {
     const parsedTx = {
       contractCreation: tx.contractAddress !== "",
@@ -146,7 +144,7 @@ export const parseTransactions = (transactions: IRawTransaction[]): IParsedTrans
       gasPrice: new BigNumber(tx.gasPrice),
       gasUsed: new BigNumber(tx.gasUsed),
       hash: tx.hash,
-      to: tx.to,
+      to: tx.contractAddress !== "" ? tx.contractAddress : tx.to,
       txFailed: tx.txreceipt_status === "0",
       value: new BigNumber(tx.value),
     };

@@ -3,31 +3,33 @@
   "endDate": "YYYY-MM-DD",
   "ethScanApiKey": "your EtherScan api key",
   "fiatCurrency": "EUR",
-  "wallets": [
-    {
-      "address": "0x0000000000000000000000000000000000000000",
-      "alias": "alias1",
-      "isDev": true
-    },
-    {
-      "address": "0x0000000000000000000000000000000000000000",
-      "alias": "alias2"
-    }
-  ],
-  "contracts": [
-    {
-      "address": "0x0000000000000000000000000000000000000000",
-      "alias": "alias1"
-    },
-    {
-      "address": "0x0000000000000000000000000000000000000000",
-      "alias": "alias2"
-    }
-  ],
-  "kraken": {
-    "enabled": false,
-    "key": "",
-    "secret": ""
+  "ethereumNodeUrl": "http://example.org:8545",
+  "ETH": {
+    "wallets": [
+      {
+        "address": "0x0000000000000000000000000000000000000000",
+        "alias": "alias1",
+        "isDev": true
+      },
+      {
+        "address": "0x0000000000000000000000000000000000000000",
+        "alias": "alias2"
+      }
+    ],
+    "contracts": [
+      {
+        "address": "0x0000000000000000000000000000000000000000",
+        "alias": "alias1"
+      },
+      {
+        "address": "0x0000000000000000000000000000000000000000",
+        "alias": "alias2"
+      }
+    ]
+  },
+  "NEU": {
+    "tokenMapperUrl": "http://example.com",
+    "contractAddress": "0xa823e6722006afe99e91c30ff5295052fe6b8e32"
   },
   "email": {
     "enabled": false,
