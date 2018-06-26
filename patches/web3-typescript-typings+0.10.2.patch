@@ -1,0 +1,13 @@
+patch-package
+--- a/node_modules/web3-typescript-typings/index.d.ts
++++ b/node_modules/web3-typescript-typings/index.d.ts
+@@ -22,8 +22,7 @@ declare module 'web3' {
+         public fromAscii(ascii: string, padding?: number): string;
+         public toDecimal(hex: string): number;
+         public fromDecimal(value: number | string): string;
+-        public fromWei(value: number | string, unit: Web3.Unit): string;
+-        public fromWei(value: BigNumber.BigNumber, unit: Web3.Unit): BigNumber.BigNumber;
++        public fromWei(value: number | string | BigNumber.BigNumber, unit: Web3.Unit): BigNumber.BigNumber;
+         public toWei(amount: number | string, unit: Web3.Unit): string;
+         public toWei(amount: BigNumber.BigNumber, unit: Web3.Unit): BigNumber.BigNumber;
+         public toBigNumber(value: number | string): BigNumber.BigNumber;
