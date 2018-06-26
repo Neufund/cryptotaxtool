@@ -5,7 +5,7 @@ import * as Papa from "papaparse";
 
 import { config } from "../config";
 import { CryptoCurrency, ExpenseType, ILedgerEntry, TxType } from "../typings/types";
-import { parseCurrency } from "../utils";
+import { ledgerEntryComparator, parseCurrency } from "../utils";
 
 const COIN_TRACKING_DATE_FORMAT = "DD.MM.YYYY HH:mm";
 
@@ -201,21 +201,3 @@ export const combineCoinTrackingInfo = (
 
 const csvDateFilter = (line: string[]): boolean =>
   Moment(line[9], COIN_TRACKING_DATE_FORMAT).isBetween(config.startDate, config.endDate);
-
-const ledgerEntryComparator = (a: ILedgerEntry, b: ILedgerEntry): number => {
-  const dateDiff = a.date.diff(b.date);
-  if (dateDiff !== 0) {
-    return dateDiff;
-  }
-
-  const stringDiff = a.id.localeCompare(b.id);
-  if (stringDiff !== 0) {
-    return stringDiff;
-  }
-  const typeDiff = a.type.localeCompare(b.type);
-  if (typeDiff !== 0) {
-    return typeDiff;
-  }
-
-  return a.expenseType.localeCompare(b.expenseType);
-};
