@@ -1,22 +1,17 @@
 import { BigNumber } from "bignumber.js";
 import { promisify } from "bluebird";
+import { uniqBy } from "lodash";
 import * as Moment from "moment";
 import nodeFetch from "node-fetch";
 import * as Web3 from "web3";
 
 import { config, getEthAlias } from "../config";
-import { CryptoCurrency, ILedgerEntry, TxType } from "../typings/types";
+import { CryptoCurrency, ExpenseType, ILedgerEntry, TxType } from "../typings/types";
+import { ledgerEntryComparator } from "../utils";
 import { IRawTokenMapperTx } from "./types";
 
-/*
-  This need to be rewritten.
-*/
-
 export const gatherNEU = async (): Promise<ILedgerEntry[]> => {
-  const walletsToCheck = [
-    "",
-    "",
-  ];
+  const walletsToCheck = config.ETH.wallets.map(wallet => wallet.address);
   console.log("getting NEU transactions from token mapper");
   const rawTxs = await getNEUTx(walletsToCheck);
   console.log("filling missing transaction data");
@@ -33,13 +28,11 @@ const getNEUTx = async (walletsToCheck: string[]): Promise<IRawTokenMapperTx[]> 
     });
     rawTxs.push(...txs.filter((tx: IRawTokenMapperTx) => tx.amount !== "0"));
   }
-  return rawTxs;
+  return uniqBy(rawTxs, "tx_hash");
 };
 
 const fillTxData = async (txs: IRawTokenMapperTx[]): Promise<ILedgerEntry[]> => {
-  const web3 = new Web3(
-    new Web3.providers.HttpProvider("")
-  );
+  const web3 = new Web3(new Web3.providers.HttpProvider(config.ethereumNodeUrl));
   const getTransactionReceiptAsync = promisify<Web3.Transaction, string>(
     web3.eth.getTransactionReceipt
   );
@@ -64,39 +57,77 @@ const fillTxData = async (txs: IRawTokenMapperTx[]): Promise<ILedgerEntry[]> => 
     });
   }
 
-  return combinedTxs
-    .map(
-      (tObj: {
-        ethTx: Web3.Transaction;
-        ethTxRec: Web3.TransactionReceipt;
-        mappedTx: IRawTokenMapperTx;
-      }): ILedgerEntry => {
-        const receiver =
-          getEthAlias(tObj.mappedTx.to_address) !== undefined
-            ? getEthAlias(tObj.mappedTx.from_address).alias
-            : tObj.mappedTx.to_address;
-        const sender =
-          getEthAlias(tObj.mappedTx.from_address) !== undefined
-            ? getEthAlias(tObj.mappedTx.from_address).alias
-            : tObj.mappedTx.from_address;
+  for (const combinedTx of combinedTxs) {
+    const knownMethodCaller = getEthAlias(combinedTx.ethTx.from) !== undefined;
+    const knownReceiver = getEthAlias(combinedTx.mappedTx.to_address) !== undefined;
+    const knownSender = getEthAlias(combinedTx.mappedTx.from_address) !== undefined;
 
-        return {
-          date: Moment(tObj.mappedTx.date),
-          id: tObj.mappedTx.tx_hash,
-          receiver,
-          sender,
-          feeCurrency: CryptoCurrency.ETH,
-          senderCurrency: CryptoCurrency.NEU,
-          receiverCurrency: CryptoCurrency.NEU,
-          feeAmount: web3.fromWei(tObj.ethTx.gasPrice.times(tObj.ethTxRec.gasUsed), "ether"),
-          receiverAmount: web3.fromWei(new BigNumber(tObj.mappedTx.amount), "ether"),
-          senderAmount: web3.fromWei(new BigNumber(tObj.mappedTx.amount), "ether"),
-          notes: "",
-          type: TxType.EXPENSE,
-        };
-      }
-    )
-    .sort(comparatorDateMoment);
+    const receiverAmount = web3.fromWei(new BigNumber(combinedTx.mappedTx.amount), "ether");
+    const feeAmount = web3.fromWei(
+      combinedTx.ethTx.gasPrice.times(combinedTx.ethTxRec.gasUsed),
+      "ether"
+    );
+
+    const receiver = knownReceiver
+      ? getEthAlias(combinedTx.mappedTx.to_address).alias
+      : combinedTx.mappedTx.to_address;
+    const sender = knownSender
+      ? getEthAlias(combinedTx.mappedTx.from_address).alias
+      : combinedTx.mappedTx.from_address;
+
+    let notes = "";
+    let type = null;
+    let expenseType = null;
+
+    if (knownReceiver && !knownSender) {
+      type = TxType.DEPOSIT;
+    } else if (!knownReceiver && knownSender) {
+      type = TxType.EXPENSE;
+      expenseType = ExpenseType.PAYMENT;
+    } else if (knownReceiver && knownSender) {
+      type = TxType.LOCAL;
+    } else {
+      throw new Error("Unknown sender and receiver of Neumark transaction");
+    }
+
+    // Special case for Neumark generation
+    if (knownReceiver && knownSender && !knownMethodCaller) {
+      type = TxType.DEPOSIT;
+      notes = "NEU generation";
+    }
+
+    ret.push({
+      date: Moment(combinedTx.mappedTx.date),
+      id: combinedTx.mappedTx.tx_hash,
+      receiver,
+      sender,
+      senderCurrency: CryptoCurrency.NEU,
+      receiverCurrency: CryptoCurrency.NEU,
+      receiverAmount,
+      senderAmount: receiverAmount,
+      type,
+      expenseType,
+      notes,
+    });
+
+    if (type !== TxType.DEPOSIT) {
+      ret.push({
+        date: Moment(combinedTx.mappedTx.date),
+        id: combinedTx.mappedTx.tx_hash,
+        receiver: "ETH network",
+        sender,
+        senderCurrency: CryptoCurrency.ETH,
+        receiverCurrency: CryptoCurrency.ETH,
+        receiverAmount: feeAmount,
+        senderAmount: feeAmount,
+        type: TxType.EXPENSE,
+        expenseType: ExpenseType.FEE,
+        notes: "",
+      });
+    }
+  }
+
+  return ret.sort(ledgerEntryComparator);
 };
 
 const generateEndpointUrl = (address: string): string => {
@@ -105,5 +136,13 @@ const generateEndpointUrl = (address: string): string => {
   }/transfers/${address}`;
 };
 
-const comparatorDateMoment = (a: ILedgerEntry, b: ILedgerEntry): number =>
-  a.date.valueOf() - b.date.valueOf();
+export const combineNEUTransfers = (
+  ledgerData: ILedgerEntry[],
+  neuTxs: ILedgerEntry[]
+): ILedgerEntry[] => {
+  const ret = ledgerData.concat(
+    neuTxs.filter(ledgerEntry => ledgerEntry.expenseType !== ExpenseType.FEE)
+  );
+
+  return ret.sort(ledgerEntryComparator);
+};
